@@ -1,7 +1,7 @@
 #include "stopwatch.h"
 #include "peripherals/timer.h"
 #include "serial_port.h"
-#include "system_time.h"
+#include "system_clock.h"
 
 /* ************************************************************************** */
 
