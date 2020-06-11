@@ -1,4 +1,4 @@
-#include "system_time.h"
+#include "system_clock.h"
 #include "peripherals/timer.h"
 
 /* ************************************************************************** */
@@ -22,7 +22,7 @@
 
 #define SMT_latch_now() SMT1STATbits.CPRUP = 1
 
-void system_time_init(void) {
+void system_clock_init(void) {
     // set timer2 to overflow in exactly 1mS
     timer2_clock_source(TMR_CLK_FOSC);
     timer2_prescale(TMR_PRE_1_128);
@@ -110,31 +110,3 @@ void delay_ms(system_time_t milliSeconds) {
         // empty loop
     }
 }
-
-/* ************************************************************************** */
-
-#include "os/shell/shell_command_utils.h"
-
-//
-#define CLOCK_CHECK_COOLDOWN 1000
-
-int8_t clockmon_callback(char currentChar) {
-    static system_time_t lastAttempt = 0;
-    if (time_since(lastAttempt) < CLOCK_CHECK_COOLDOWN) {
-        return 0;
-    }
-    lastAttempt = get_current_time();
-
-    printf("[%lu] \r\n", get_current_time());
-
-    return 0;
-}
-
-// setup
-void sh_clockmon(int argc, char **argv) {
-    println("entering clockmon");
-
-    shell_register_callback(clockmon_callback);
-}
-
-REGISTER_SHELL_COMMAND(sh_clockmon, "clockmon");
