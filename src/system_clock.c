@@ -1,45 +1,30 @@
 #include "system_clock.h"
-#include "peripherals/timer.h"
+#include "peripherals/numerically_controlled_oscillator.h"
+#include "peripherals/signal_measurement_timer.h"
 
 /* ************************************************************************** */
-// SMT helper macros
-#define SMT_enable() SMT1CON0bits.EN = 1
-#define SMT_disable() SMT1CON0bits.EN = 0
-
-#define SMT_start() SMT1CON1bits.GO = 1
-#define SMT_stop() SMT1CON1bits.GO = 0
-
-#define SMT_clear() SMT1TMR = 0
-
-#define SMT_interrupt_enable() PIE1bits.SMT1IE = 1
-#define SMT_interrupt_disable() PIE1bits.SMT1IE = 0
-
-#define SMT_mode(mode) SMT1CON1bits.MODE = mode
-#define SMT_MODE_COUNTER 0b1000
-
-#define SMT_signal(source) SMT1SIGbits.SSEL = source
-#define SMT_SIGNAL_TMR2 0b00011
-
-#define SMT_latch_now() SMT1STATbits.CPRUP = 1
 
 void system_clock_init(void) {
-    // set timer2 to overflow in exactly 1mS
-    timer2_clock_source(TMR_CLK_FOSC);
-    timer2_prescale(TMR_PRE_1_128);
-    timer2_postscale(TMR_POST_1_2);
-    timer2_period_set(0xF9);
-
-    timer2_start();
-
-    // set Signal Measurement Timer to count the number of timer2 overflows
-    SMT_mode(SMT_MODE_COUNTER);
-    SMT_signal(SMT_SIGNAL_TMR2);
-    SMT_clear();
+    nco_set_pulse_frequency_mode(NCO_MODE_PULSE_FREQUENCY);
     
-    SMT_enable();
-    SMT_start();
+    // use 500khz MFINTOSC
+    // nco_set_clock_source(NCO_CLOCK_SOURCE_MFINTOSC_500);
+    // nco_set_incrementor(0x000831);
 
-    SMT_interrupt_enable();
+    // use 32khz LFINTOSC
+    nco_set_clock_source(NCO_CLOCK_SOURCE_LFINTOSC);
+    nco_set_incrementor(0x008421);
+    
+    nco_enable();
+
+    smt_set_operation_mode(SMT_MODE_COUNTER);
+    smt_set_signal_input(SMT_SIGNAL_INPUT_NCO1);
+    smt_clear();
+
+    smt_enable();
+    smt_start();
+
+    smt_interrupt_enable();
 }
 
 /* -------------------------------------------------------------------------- */
@@ -47,7 +32,7 @@ void system_clock_init(void) {
 static volatile uint8_t smtOverflowCount;
 
 void __interrupt(irq(SMT1), high_priority) SMT_overflow_ISR() {
-    PIR1bits.SMT1IF = 0; // clear SMT interrupt flag
+    smt_clear_interrupt_flag();
 
     smtOverflowCount++;
 }
@@ -74,14 +59,14 @@ void __interrupt(irq(SMT1), high_priority) SMT_overflow_ISR() {
 */
 
 system_time_t get_current_time(void) {
-    SMT_interrupt_disable();
-    SMT_latch_now();
+    smt_interrupt_disable();
+    smt_latch_now();
 
     system_time_t currentTime = smtOverflowCount;
     currentTime <<= 24;
-    currentTime += SMT1CPR;
+    currentTime += smt_read();
 
-    SMT_interrupt_enable();
+    smt_interrupt_enable();
 
     return currentTime;
 }
