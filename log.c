@@ -1,5 +1,5 @@
 #include "log.h"
-#include "libraries/str_len.h"
+#include "os/libs/str_len.h"
 #include "serial_port.h"
 #include "shell/shell_utils.h"
 #include "system_time.h"
