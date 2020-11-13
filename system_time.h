@@ -1,15 +1,26 @@
-#ifndef _SYSTEM_CLOCK_H_
-#define _SYSTEM_CLOCK_H_
+#ifndef _SYSTEM_TIME_H_
+#define _SYSTEM_TIME_H_
 
 #include <stdint.h>
 
 /* ************************************************************************** */
-/*  Notes on using the System Clock module
+/*  Notes on using the System Tick module
 
     This module counts the system's uptime in milliseconds. It functions
     similarly to the millis() function from the Arduino platform.
 
-    Unlike millis(), this system clock module uses 
+    There are several differences between millis() and get_current_time():
+
+    millis() stores its count in a uint32_t, meaning it takes roughly 49 days
+    for millis() to overflow. get_current_time() stores its count in a uint24_t,
+    meaning it takes roughly 4.6 hours to overflow.
+
+    millis() requires an interrupt to fire every millisecond, and an ISR that
+    increments a 4-byte-long uint32_t. This is a very quick ISR, but it's less
+    than ideal that this ISR will need to be running all the time, behind any
+    other operations you intend to do on your system. get_current_time() uses no
+    interrupt, so it still counts time during critical sections of code and will
+    never contribute to interrupt-based timer bugs.
 
     This module uses several hardware features of the K42. One hardware timer of
     any variety needs to be configured to overflow every millisecond.
@@ -42,7 +53,7 @@ typedef uint32_t system_time_t;
 /* ************************************************************************** */
 
 // setup
-extern void system_clock_init(void);
+extern void system_time_init(void);
 
 /* -------------------------------------------------------------------------- */
 

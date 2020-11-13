@@ -1,10 +1,10 @@
-#include "system_clock.h"
+#include "system_time.h"
 #include "peripherals/numerically_controlled_oscillator.h"
 #include "peripherals/signal_measurement_timer.h"
 
 /* ************************************************************************** */
 
-void system_clock_init(void) {
+void system_time_init(void) {
     nco_set_pulse_frequency_mode(NCO_MODE_PULSE_FREQUENCY);
     
     // use 500khz MFINTOSC
@@ -95,3 +95,31 @@ void delay_ms(system_time_t milliSeconds) {
         // empty loop
     }
 }
+
+/* ************************************************************************** */
+
+#include "os/shell/shell_command_utils.h"
+
+//
+#define CLOCK_CHECK_COOLDOWN 1000
+
+int8_t clockmon_callback(char currentChar) {
+    static system_time_t lastAttempt = 0;
+    if (time_since(lastAttempt) < CLOCK_CHECK_COOLDOWN) {
+        return 0;
+    }
+    lastAttempt = get_current_time();
+
+    printf("[%lu] \r\n", get_current_time());
+
+    return 0;
+}
+
+// setup
+void sh_clockmon(int argc, char **argv) {
+    println("entering clockmon");
+
+    shell_register_callback(clockmon_callback);
+}
+
+REGISTER_SHELL_COMMAND(sh_clockmon, "clockmon");
