@@ -1,4 +1,4 @@
-#include "log.h"
+#include "logging.h"
 #include "os/libs/str_len.h"
 #include "serial_port.h"
 #include "shell/shell_utils.h"
@@ -9,7 +9,7 @@
 
 #ifndef LOGGING_ENABLED
 
-void log_init(void) {}
+void logging_init(void) {}
 void log_fix_shortnames(void) {}
 void log_register__(const char *name, uint8_t *levelPtr) {}
 void log_level_edit(uint8_t fileID, uint8_t level) {}
@@ -35,7 +35,7 @@ log_features_t logFeatures = {true, true, true, true, true};
 
 /* -------------------------------------------------------------------------- */
 
-void log_init(void) {
+void logging_init(void) {
     for (uint8_t i = 0; i < MAX_NUMBER_OF_FILES; i++) {
         logDatabase.file[i].name = NULL;
         logDatabase.file[i].levelPtr = NULL;

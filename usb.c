@@ -5,7 +5,7 @@
 #include "os/json/json_messages.h"
 #include "os/json/json_print.h"
 #include "os/libs/str_len.h"
-#include "os/log_macros.h"
+#include "os/logging.h"
 #include "os/serial_port.h"
 #include "os/usb_port.h"
 #include "peripherals/uart.h"
