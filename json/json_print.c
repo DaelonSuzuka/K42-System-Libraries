@@ -14,7 +14,12 @@
     typedef void (*printer_t)(const char *);
 
 */
-static printer_t out;
+
+static void dummy_print(const char *string) {
+    // this body left intentionally blank
+}
+
+static printer_t out = &dummy_print;
 
 /* ************************************************************************** */
 
