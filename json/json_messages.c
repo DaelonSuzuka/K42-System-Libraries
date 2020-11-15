@@ -1,6 +1,6 @@
 #include "json_messages.h"
 #include "peripherals/device_information.h"
-#include "project_variables.h"
+#include "system.h"
 #include <string.h>
 
 /* ************************************************************************** */

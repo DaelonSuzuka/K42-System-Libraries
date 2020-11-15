@@ -1,10 +1,10 @@
 #include "os/json/json_messages.h"
 #include "os/json/json_print.h"
 #include "os/libs/str_len.h"
-#include "project_variables.h"
 #include "shell_command_processor.h"
 #include "shell_command_utils.h"
 #include "shell_config.h"
+#include "system.h"
 #include <string.h>
 
 /* ************************************************************************** */
