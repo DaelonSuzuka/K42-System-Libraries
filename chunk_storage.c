@@ -66,10 +66,10 @@ uint8_t create_new_chunk(uint16_t chunkSize, uint16_t overprovisionSize) {
 
 #define NO_VALID_RECORD -1
 
-/*  find_current_record() steps through EEPROM, reading the first byte of
+/*  find_current_slice() steps through EEPROM, reading the first byte of
     every stored record, looking for one where the first bit is 0.
 */
-int16_t find_current_record(uint8_t chunkID) {
+int16_t find_current_slice(uint8_t chunkID) {
     uint8_t address = chunks[chunkID].start;
 
     while (address < (chunks[chunkID].size * chunks[chunkID].overprovision)) {
@@ -85,7 +85,7 @@ int16_t find_current_record(uint8_t chunkID) {
 
 /* ************************************************************************** */
 
-void read_record(uint16_t address, uint8_t chunkID, uint8_t *destination) {
+void read_slice(uint16_t address, uint8_t chunkID, uint8_t *destination) {
     destination[0] = (internal_eeprom_read(address) & 0x7f);
 
     for (uint8_t i = 1; i < chunks[chunkID].size; i++) {
@@ -96,12 +96,12 @@ void read_record(uint16_t address, uint8_t chunkID, uint8_t *destination) {
 void read_chunk(uint8_t chunkID, uint8_t *destination) {
     LOG_TRACE({ println("read_chunk"); });
 
-    int16_t address = find_current_record(chunkID);
+    int16_t address = find_current_slice(chunkID);
 
     if (address != NO_VALID_RECORD) {
         LOG_INFO({ printf("found valid records at: %d\r\n", address); });
 
-        read_record(address, chunkID, destination);
+        read_slice(address, chunkID, destination);
     } else {
         LOG_INFO({ println("no valid record"); });
     }
@@ -109,7 +109,7 @@ void read_chunk(uint8_t chunkID, uint8_t *destination) {
 
 /* -------------------------------------------------------------------------- */
 
-void write_record(uint16_t address, uint8_t chunkID, uint8_t *source) {
+void write_slice(uint16_t address, uint8_t chunkID, uint8_t *source) {
     internal_eeprom_write(address, (source[0] & 0x7f));
 
     for (uint8_t i = 1; i < chunks[chunkID].size; i++) {
@@ -120,14 +120,14 @@ void write_record(uint16_t address, uint8_t chunkID, uint8_t *source) {
 void write_chunk(uint8_t chunkID, uint8_t *source) {
     LOG_TRACE({ println("write_chunk"); });
 
-    int16_t address = find_current_record(chunkID);
+    int16_t address = find_current_slice(chunkID);
     if (address == NO_VALID_RECORD) {
         address = chunks[chunkID].start;
     }
 
     // assemble our records
     uint8_t existingData[MAX_CHUNK_SIZE];
-    read_record(address, chunkID, &existingData);
+    read_slice(address, chunkID, &existingData);
 
     // make sure what we're trying to save is different
     bool recordsAreDifferent = false;
@@ -149,6 +149,6 @@ void write_chunk(uint8_t chunkID, uint8_t *source) {
         }
 
         LOG_INFO({ printf("saving records at: %d\r\n", address); });
-        write_record(address, chunkID, source);
+        write_slice(address, chunkID, source);
     }
 }
