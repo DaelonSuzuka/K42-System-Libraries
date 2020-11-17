@@ -5,17 +5,17 @@
 /* ************************************************************************** */
 
 void system_time_init(void) {
-    nco_set_pulse_frequency_mode(NCO_MODE_PULSE_FREQUENCY);
+    nco1_set_pulse_frequency_mode(NCO_MODE_PULSE_FREQUENCY);
     
     // use 500khz MFINTOSC
-    // nco_set_clock_source(NCO_CLOCK_SOURCE_MFINTOSC_500);
-    // nco_set_incrementor(0x000831);
+    // nco1_set_clock_source(NCO_CLOCK_SOURCE_MFINTOSC_500);
+    // nco1_set_incrementor(0x000831);
 
     // use 32khz LFINTOSC
-    nco_set_clock_source(NCO_CLOCK_SOURCE_LFINTOSC);
-    nco_set_incrementor(0x008421);
+    nco1_set_clock_source(NCO_CLOCK_SOURCE_LFINTOSC);
+    nco1_set_incrementor(0x008421);
     
-    nco_enable();
+    nco1_enable();
 
     smt_set_operation_mode(SMT_MODE_COUNTER);
     smt_set_signal_input(SMT_SIGNAL_INPUT_NCO1);
