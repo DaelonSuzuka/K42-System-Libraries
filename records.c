@@ -55,15 +55,14 @@ uint8_t create_new_record(uint16_t recordSize, uint16_t overprovisionFactor,
     records[numOfRecords].size = recordSize;
     records[numOfRecords].overprovision = overprovisionFactor;
 
-    uint16_t nextStart = records[numOfRecords].start;
+    uint16_t nextStart = records[numOfRecords].start + 1;
 
     if (overprovisionFactor) {
         records[numOfRecords].length = (recordSize + 1) * overprovisionFactor;
-        nextStart += (recordSize * overprovisionFactor);
     } else {
         records[numOfRecords].length = recordSize;
-        nextStart += recordSize;
     }
+    nextStart += records[numOfRecords].length;
 
     numOfRecords++;
     records[numOfRecords].start = nextStart;
@@ -81,31 +80,32 @@ int16_t get_record_address(uint8_t recordID) {
     }
 
     uint16_t address = records[recordID].start;
+    uint16_t end = address + records[recordID].length;
 
-    while (address < records[recordID].length) {
-        printf("checking: %d (%d) \r\n", address,
-               internal_eeprom_read(address));
-        if (internal_eeprom_read(address) == 'U') {
+    while (address < end) {
+        // printf("checking: %d (%d) \r\n", address,
+        //        internal_eeprom_read(address));
+        if (internal_eeprom_read(address) == 0) {
 
-            println("found");
+            // println("found");
             return address;
         }
         address += records[recordID].size + 1;
     }
 
     // didn't find record
-    println("didn't find");
+    // println("didn't find");
     return records[recordID].start;
 }
 
 /* ************************************************************************** */
 
 void read_slice(uint16_t address, uint8_t recordID, uint8_t *destination) {
-    // if (records[recordID].overprovision) {
-    //     address += 1;
-    // }
+    if (records[recordID].overprovision) {
+        address += 1;
+    }
 
-    printf("reading from %d\r\n", address);
+    // printf("reading from %d\r\n", address);
 
     for (uint8_t i = 0; i < records[recordID].size; i++) {
         destination[i] = (internal_eeprom_read(address + i));
@@ -119,7 +119,7 @@ void load_record(uint8_t recordID, uint8_t *destination) {
 
     if (address != NO_VALID_RECORD) {
         if (records[recordID].overprovision) {
-            address += 1;
+            // address += 1;
         }
         LOG_INFO({ printf("found valid record at: %d\r\n", address); });
         read_slice(address, recordID, destination);
@@ -131,10 +131,10 @@ void load_record(uint8_t recordID, uint8_t *destination) {
 /* -------------------------------------------------------------------------- */
 
 void write_slice(uint16_t address, uint8_t recordID, uint8_t *source) {
-    // if (records[recordID].overprovision) {
-    //     address += 1;
-    // }
-    printf("writing to %d\r\n", address);
+    if (records[recordID].overprovision) {
+        address += 1;
+    }
+    // printf("writing to %d\r\n", address);
 
     for (uint8_t i = 0; i < records[recordID].size; i++) {
         internal_eeprom_write(address + i, source[i]);
@@ -167,17 +167,15 @@ void store_record(uint8_t recordID, uint8_t *source) {
         internal_eeprom_write(address, 0xff);
 
         // increment to the next record location
-        address += records[recordID].size;
-        if (address >
-            (records[recordID].size * records[recordID].overprovision)) {
+        address += records[recordID].size + 1;
+
+        uint16_t end = records[recordID].start + records[recordID].length;
+        if (address > end)  {
             address = records[recordID].start;
         }
 
         if (records[recordID].overprovision) {
-            address += 1;
-            printf("marking: %d \r\n", address);
-            internal_eeprom_write(address, 'U');
-            address += 1;
+            internal_eeprom_write(address, 0);
         }
         LOG_INFO({ printf("saving record at: %d\r\n", address); });
         write_slice(address, recordID, source);

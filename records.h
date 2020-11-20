@@ -12,7 +12,10 @@
 extern void records_init(uint16_t minAddress, uint16_t maxAddress);
 
 //
-enum recordLocation { record_eeprom, record_flash };
+enum recordLocation { 
+    record_eeprom, 
+    record_flash 
+};
 
 // allocate a new chunk
 // returns the chunkID of the created chunk
