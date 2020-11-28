@@ -1,9 +1,11 @@
 #include "os/json/json_messages.h"
 #include "os/json/json_print.h"
 #include "os/libs/str_len.h"
+#include "os/system_time.h"
 #include "shell_command_processor.h"
 #include "shell_command_utils.h"
 #include "shell_config.h"
+#include "shell_keys.h"
 #include "system.h"
 #include <string.h>
 
@@ -17,6 +19,59 @@ void shell_help(int argc, char **argv) {
 }
 
 REGISTER_SHELL_COMMAND(shell_help, "help");
+
+/* -------------------------------------------------------------------------- */
+
+system_time_t rebootStartTime;
+
+int8_t reboot_callback(char currentChar) {
+    if (time_since(rebootStartTime) > 5000) {
+        println("aborting");
+        delay_ms(250);
+        return -1;
+    }
+
+    if (iscntrl(currentChar)) {
+        key_t key = identify_key(currentChar);
+        switch (key.key) {
+        default:
+            return 0;
+
+        case ESCAPE:
+            return -1;
+        }
+    }
+
+    if (isprint(currentChar)) {
+        printf("%c\r\n", currentChar);
+
+        if (currentChar == 'y' || currentChar == 'Y') {
+            println("rebooting");
+            delay_ms(50);
+            asm("RESET");
+            return 0;
+        }
+        return -1;
+    }
+
+    return 0;
+}
+
+//
+void shell_reboot(int argc, char **argv) {
+    if ((argc == 2) && (!strcmp(argv[1], "-y"))) {
+        println("rebooting");
+        asm("RESET");
+        return;
+    }
+
+    print("confirm reboot [Y/n]: ");
+
+    shell_register_callback(reboot_callback);
+    rebootStartTime = get_current_time();
+}
+
+REGISTER_SHELL_COMMAND(shell_reboot, "reboot");
 
 /* -------------------------------------------------------------------------- */
 
