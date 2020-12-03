@@ -42,9 +42,9 @@ void swap_active_buffer(void) {
 
 static responder_t response_function;
 
-void usb_init(uart_interface_t interface, responder_t responder) {
+void usb_init(uart_config_t *config, responder_t responder) {
     // pass the uart down to the usb port driver
-    usb_port_init(interface);
+    usb_port_init(config);
 
     response_function = responder;
 

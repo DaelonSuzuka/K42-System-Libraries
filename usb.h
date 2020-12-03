@@ -55,7 +55,7 @@ typedef struct {
 typedef void (*responder_t)(json_buffer_t *buf);
 
 // initialize the USB port by creating and passing in a UART interface object
-extern void usb_init(uart_interface_t interface, responder_t responder);
+extern void usb_init(uart_config_t *config, responder_t responder);
 
 // returns true if a message is currently being recieved
 extern bool usb_is_recieving(void);

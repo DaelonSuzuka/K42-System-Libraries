@@ -5,21 +5,26 @@
 
 EMPTY_UART_INTERFACE(uart);
 
-void usb_port_init(uart_interface_t interface) {
-    //
-    uart = interface;
+void usb_port_init(uart_config_t *config) {
+    uart = UART_init(config); //
 }
 
 /* -------------------------------------------------------------------------- */
 
 // Print a single character to the USB port
-void usb_putch(char data) { uart.tx_char(data); }
+void usb_putch(char data) {
+    uart.tx_char(data); //
+}
 
 // Read a single character from the USB port
-char usb_getch(void) { return uart.rx_char(); }
+char usb_getch(void) {
+    return uart.rx_char(); //
+}
 
 // Print a string to the USB port
-void usb_print(const char *string) { uart.tx_string(string, '\0'); }
+void usb_print(const char *string) {
+    uart.tx_string(string, '\0'); //
+}
 
 // Print a string and append a newline
 void usb_println(const char *string) {

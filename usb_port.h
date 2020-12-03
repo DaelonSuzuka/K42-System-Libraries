@@ -5,7 +5,7 @@
 
 /* ************************************************************************** */
 
-extern void usb_port_init(uart_interface_t interface);
+extern void usb_port_init(uart_config_t *config);
 
 /* -------------------------------------------------------------------------- */
 

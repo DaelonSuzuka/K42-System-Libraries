@@ -5,9 +5,8 @@
 
 EMPTY_UART_INTERFACE(uart);
 
-void serial_port_init(uart_interface_t interface) {
-    //
-    uart = interface;
+void serial_port_init(uart_config_t *config) {
+    uart = UART_init(config); //
 }
 
 /* -------------------------------------------------------------------------- */
@@ -15,14 +14,12 @@ void serial_port_init(uart_interface_t interface) {
 // Print a single character to the console
 // Also needed for compiler provided printf
 void putch(char data) {
-    //
-    uart.tx_char(data);
+    uart.tx_char(data); //
 }
 
 // Read a single character from the console
 char getch(void) {
-    //
-    return uart.rx_char();
+    return uart.rx_char(); //
 }
 
 // Print a string

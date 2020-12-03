@@ -41,8 +41,8 @@ static void terminate_current_program(void) {
 /* ************************************************************************** */
 
 // set up the entire shell subsystem
-void shell_init(uart_interface_t interface) {
-    serial_port_init(interface);
+void shell_init(uart_config_t *config) {
+    serial_port_init(config);
 
     // initialize shell
     shell_reset_line(shell);

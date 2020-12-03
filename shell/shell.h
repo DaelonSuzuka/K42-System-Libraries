@@ -35,7 +35,7 @@ extern shell_line_t shell;
 /* ************************************************************************** */
 
 // setup
-extern void shell_init(uart_interface_t interface);
+extern void shell_init(uart_config_t *config);
 
 /*	Main Shell processing
 

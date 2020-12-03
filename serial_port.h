@@ -9,7 +9,7 @@
 /* ************************************************************************** */
 
 // Setup
-extern void serial_port_init(uart_interface_t interface);
+extern void serial_port_init(uart_config_t *config);
 
 /* -------------------------------------------------------------------------- */
 
