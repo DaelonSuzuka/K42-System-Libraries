@@ -331,6 +331,4 @@ void sh_logedit(int argc, char **argv) {
     shell_register_callback(logedit_callback);
 }
 
-REGISTER_SHELL_COMMAND(sh_logedit, "logedit");
-
 #endif // #ifdef LOGGING_ENABLED

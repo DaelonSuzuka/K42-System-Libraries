@@ -6,7 +6,7 @@
 
 void system_time_init(void) {
     nco1_set_pulse_frequency_mode(NCO_MODE_PULSE_FREQUENCY);
-    
+
     // use 500khz MFINTOSC
     // nco1_set_clock_source(NCO_CLOCK_SOURCE_MFINTOSC_500);
     // nco1_set_incrementor(0x000831);
@@ -14,7 +14,7 @@ void system_time_init(void) {
     // use 32khz LFINTOSC
     nco1_set_clock_source(NCO_CLOCK_SOURCE_LFINTOSC);
     nco1_set_incrementor(0x008421);
-    
+
     nco1_enable();
 
     smt_set_operation_mode(SMT_MODE_COUNTER);
@@ -121,5 +121,3 @@ void sh_clockmon(int argc, char **argv) {
 
     shell_register_callback(clockmon_callback);
 }
-
-REGISTER_SHELL_COMMAND(sh_clockmon, "clockmon");

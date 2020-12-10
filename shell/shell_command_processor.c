@@ -1,6 +1,6 @@
 #include "shell_command_processor.h"
-#include "serial_port.h"
 #include "shell.h"
+#include "shell_config.h"
 #include <string.h>
 
 /* ************************************************************************** */
@@ -14,63 +14,20 @@ shell_args_t new_args(void) {
 }
 
 /* ************************************************************************** */
-/*  Shell Command List
 
-    The shell command list is assembled at compile time. Each shell command
-    definition must be accompanied by a call to the REGISTER_SHELL_COMMAND()
-    macro. Here's an example shell command declaration and registration call.
+shell_command_t commandList[MAXIMUM_NUM_OF_SHELL_COMMANDS] = {0};
+uint8_t number_of_commands = 0;
 
-        void shell_example(int argc, char **argv) { <snip> }
-        REGISTER_SHELL_COMMAND(shell_example, "example");
-
-    This macro expands to something like the following:
-        const shell_command_t __section("shell_cmds") example_cmd =
-        {shell_example, "example"};
-
-    This creates a shell_command_t object named example_cmd, initializes it with
-    a function pointer shell_example() and the string that should be matched
-    with this shell command. This shell_command_t is marked const, so it lives
-    in ROM, and the compiler/linker is instructed to place this object into a
-    PSECT labeled "shell_cmds".
-
-    The end result is that we're using the linker to construct an array of
-    shell_command_t's. The entire process is a bit roundabout, but without it
-    we'd have a gross dependency inversion where this file would need to include
-    files from the user code and then call their init functions to register each
-    command into the array. That process was very error prone and generated a
-    lot of extra boilerplate code and extra noise in commits. It also had the
-    unfortunate side-effect of causing this shell code to break if the project
-    didn't have the expected files in the expected place.
-
-    !This linker-array-construction does impose one requirement on the project:
-    !The compiler MUST be called with "-Pshell_cmds" added to its flags.
-
-    If this flag isn't added to the compiler, the Linker will not give values to
-    the symblols _Lshell_cmds or _Hshell_cmds, which are vital to
-    accessing the command table from C code.
-*/
-
-// The linker defines these during compilation.
-extern const char _Lshell_cmds[]; // start of shell_cmds
-extern const char _Hshell_cmds[]; // end of shell_cmds
-
-// Use the linker-defined symbols to calculate how many commands are registered
-uint8_t calculate_number_of_commands(void) {
-    uint16_t commandListLength = _Hshell_cmds - _Lshell_cmds;
-    return commandListLength / sizeof(shell_command_t);
-}
-
-// Create and initialize a pointer we can use to retrieve the command list
-const shell_command_t *commandList;
-
-void command_processer_init(void) {
-    commandList = (const shell_command_t *)_Lshell_cmds;
+void shell_register_command(command_function_t function, const char *command) {
+    commandList[number_of_commands].function = function;
+    commandList[number_of_commands].command = command;
+    number_of_commands++;
 }
 
 // Print all registered shell commands
 void print_command_list(void) {
-    for (uint8_t i = 0; i < calculate_number_of_commands(); i++) {
-        println(commandList[i].command);
+    for (uint8_t i = 0; i < number_of_commands; i++) {
+        sh_println(commandList[i].command);
     }
 }
 
@@ -78,7 +35,7 @@ void print_command_list(void) {
 
 // returns the index in list whose command matches the given string
 int8_t find_command_in_list(char *string) {
-    for (uint8_t i = 0; i < calculate_number_of_commands(); i++) {
+    for (uint8_t i = 0; i < number_of_commands; i++) {
         // If string matches one on the list
         if (!strcmp(string, commandList[i].command)) {
             return i;
@@ -108,7 +65,7 @@ int8_t process_shell_command(shell_line_t *line) {
 
     // if we found a valid command, execute it
     if (command != -1) {
-        commandList[command].program(args.argc, args.argv);
+        commandList[command].function(args.argc, args.argv);
 
         return 0;
     }

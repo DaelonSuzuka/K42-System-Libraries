@@ -1,8 +1,8 @@
 #include "shell_keys.h"
-#include "serial_port.h"
+#include "shell.h"
 #include "shell_config.h"
-#include "system_time.h"
 #include <stdbool.h>
+#include <stdio.h>
 #include <string.h>
 
 /* ************************************************************************** */
@@ -14,10 +14,10 @@ const char *keyModifierString[] = {KEY_MODIFIER_LIST};
 
 void print_key(key_t *key) {
     if (key->mod != NONE) {
-        print(keyModifierString[key->mod]);
-        print(" + ");
+        sh_print(keyModifierString[key->mod]);
+        sh_print(" + ");
     }
-    print(keyNameString[key->key]);
+    sh_print(keyNameString[key->key]);
 }
 
 /* ************************************************************************** */
@@ -38,12 +38,12 @@ sequence_t new_sequence(void) {
 }
 
 void print_sequence(sequence_t sequence) {
-    print("{");
+    sh_print("{");
     for (uint8_t i = 0; i < sequence.length; i++) {
-        putch(sequence.buffer[i]);
+        printf("%c", sequence.buffer[i]);
     }
 
-    print("}");
+    sh_print("}");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -287,10 +287,12 @@ static key_t decode_escape_sequence(sequence_t *sequence) {
 static sequence_t intercept_escape_sequence(void) {
     sequence_t sequence = new_sequence();
 
-    system_time_t startTime = get_current_time();
-    while (time_since(startTime) < 5) {
+    // system_time_t startTime = get_current_time();
+    // while (time_since(startTime) < 5) {
+    int count = 0;
+    while (1) {
         // check for a new character
-        sequence.buffer[sequence.length] = getch();
+        sequence.buffer[sequence.length] = getchar();
         // if valid character, move to next spot in buffer
         if (sequence.buffer[sequence.length] != 0) {
             sequence.length++;
@@ -299,6 +301,12 @@ static sequence_t intercept_escape_sequence(void) {
             if (key.key != UNKNOWN) {
                 break;
             }
+        }
+
+        count++;
+        if (count == 5000) {
+            printf("timeout\r\n");
+            break;
         }
     }
 
@@ -312,6 +320,7 @@ typedef enum {
     KEY_CTRL_D = 4,
     KEY_CTRL_E = 5,
     KEY_BS = 8,
+    KEY_BS2 = 127,
     KEY_TAB = 9,
     KEY_LF = 10,
     KEY_CR = 13,
@@ -333,6 +342,7 @@ static key_t decode_control_character(char currentChar) {
     default:
         return newKey;
     case KEY_BS:
+    case KEY_BS2:
         newKey.key = BACKSPACE;
         return newKey;
     case KEY_LF:
@@ -350,12 +360,11 @@ static key_t decode_control_character(char currentChar) {
 static bool diagnosticsEnabled = false;
 
 void toggle_key_diagnostics(void) {
-
     diagnosticsEnabled = !diagnosticsEnabled;
     if (diagnosticsEnabled) {
-        println("\r\nEscape sequence diagnostics enabled.");
+        sh_println("\r\nEscape sequence diagnostics enabled.");
     } else {
-        println("\r\nEscape sequence diagnostics disabled.");
+        sh_println("\r\nEscape sequence diagnostics disabled.");
     }
 }
 
@@ -377,9 +386,9 @@ key_t identify_key(char currentChar) {
         } else {
             printf("{%d} ", currentChar);
         }
-        print(" ");
+        sh_print(" ");
         print_key(&key);
-        println("");
+        sh_println("");
     }
 
     return key;

@@ -191,7 +191,7 @@ void store_record(uint8_t recordID, uint8_t *source) {
 
 /* ************************************************************************** */
 
-static void sh_records(int argc, char **argv) {
+void sh_records(int argc, char **argv) {
     switch (argc) {
     case 1:
         println("usage:\trecords list");
@@ -249,5 +249,3 @@ static void sh_records(int argc, char **argv) {
     println("invalid arguments");
     return;
 }
-
-REGISTER_SHELL_COMMAND(sh_records, "records");

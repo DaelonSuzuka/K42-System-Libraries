@@ -1,6 +1,6 @@
 #include "shell.h"
-#include "serial_port.h"
 #include "shell_command_processor.h"
+#include "shell_command_registration.h"
 #include "shell_cursor.h"
 #include "shell_history.h"
 #include "shell_keys.h"
@@ -23,7 +23,7 @@ void shell_register_callback(shell_callback_t callback) {
 
 /*  Program termination
 
-    There's no way to know what state a program was in when we kill it. 
+    There's no way to know what state a program was in when we kill it.
 
     Therefore, just to be safe we should reset text colors, clear the screen,
     draw a new prompt, and make sure the cursor is visible.
@@ -38,12 +38,20 @@ static void terminate_current_program(void) {
     term_show_cursor();
 }
 
+/* -------------------------------------------------------------------------- */
+
+void sh_print(const char *string) {
+    printf("%s", string); //
+}
+
+void sh_println(const char *string) {
+    printf("%s\r\n", string); //
+}
+
 /* ************************************************************************** */
 
 // set up the entire shell subsystem
-void shell_init(uart_config_t *config) {
-    serial_port_init(config);
-
+void shell_init(void) {
     // initialize shell
     shell_reset_line(shell);
     shell_register_callback(NULL);
@@ -51,7 +59,12 @@ void shell_init(uart_config_t *config) {
     // shell history
     shell_history_init();
 
-    command_processer_init();
+#ifdef REGISTRATION_GENERATED_SUCCESSFULLY
+    register_all_shell_commands();
+#endif
+
+    // draw a prompt so the user know we're alive
+    draw_shell_prompt();
 }
 
 /* ************************************************************************** */
@@ -67,7 +80,7 @@ void process_escape_sequence(key_t key) {
         }
         return;
     case ENTER:
-        println("");
+        sh_println("");
         if (shell.length > 0) {
             shell_add_terminator_to_line(shell);
 
@@ -139,9 +152,7 @@ void process_escape_sequence(key_t key) {
 
 /* -------------------------------------------------------------------------- */
 
-void shell_update(void) {
-    char currentChar = getch();
-
+void shell_update(char currentChar) {
     // execute shell callback, if one is registered
     if (shellCallback) {
         // ctrl+c forces the program to terminate

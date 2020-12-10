@@ -24,7 +24,7 @@ extern void move_cursor_to(shell_line_t *line, uint8_t position);
 // erase the line and reprint it from line
 extern void draw_line(shell_line_t *line);
 
-// erase the line after the cursor and then reprint 
+// erase the line after the cursor and then reprint
 extern void draw_line_from_cursor(shell_line_t *line);
 
 // add a character to the line at the cursor, adjusting the line as necessary

@@ -14,9 +14,9 @@ void shell_history_show_newer(void) {}
 
 /* ************************************************************************** */
 #include "shell_history.h"
-#include "serial_port.h"
 #include "shell.h"
 #include "shell_cursor.h"
+#include <stdio.h>
 #include <string.h>
 
 /* ************************************************************************** */
@@ -91,17 +91,17 @@ void shell_history_init(void) {
 void toggle_history_inspection_mode(void) {
     history.historyInspectionMode = !history.historyInspectionMode;
     if (history.historyInspectionMode == 1) {
-        println("\r\nHistory inspection mode enabled.");
+        sh_println("\r\nHistory inspection mode enabled.");
     } else {
-        println("\r\nHistory inspection mode disabled.");
+        sh_println("\r\nHistory inspection mode disabled.");
     }
     draw_shell_prompt();
 }
 
 void inspect_shell_history(void) {
-    println("");
-    println("-----------------------------------------------");
-    println("Printing shell history:");
+    sh_println("");
+    sh_println("-----------------------------------------------");
+    sh_println("Printing shell history:");
     printf("History currently has %d entries.\r\n", history.length);
     printf("temp slot: %s\r\n", history.tempLine.buffer);
 
@@ -110,14 +110,14 @@ void inspect_shell_history(void) {
 
         printf("slot #%d: %s", i, history.line[line]->buffer);
         if (i == history.pointer) {
-            print(" <--");
+            sh_print(" <--");
         }
-        println("");
+        sh_println("");
     }
 
     printf("current line: %s\r\n", &shell.buffer);
-    println("-----------------------------------------------");
-    println("");
+    sh_println("-----------------------------------------------");
+    sh_println("");
 }
 
 /* -------------------------------------------------------------------------- */
