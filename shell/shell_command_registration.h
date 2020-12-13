@@ -52,6 +52,9 @@ cog.outl()
 cog.outl('#define REGISTRATION_GENERATED_SUCCESSFULLY')
 cog.outl()
 ]]] */
+
+#define REGISTRATION_GENERATED_SUCCESSFULLY
+
 /* [[[end]]] */
 
 #ifdef REGISTRATION_GENERATED_SUCCESSFULLY

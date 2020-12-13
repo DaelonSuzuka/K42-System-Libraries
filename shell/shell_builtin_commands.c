@@ -74,7 +74,7 @@ void sh_test(int argc, char **argv) {
     sh_println("SHELL ARG PARSING TEST UTILITY");
     if (argc == 1) {
         sh_println("This command has no special arguments.");
-        sh_println("It is designed to test the TuneOS shell's arg parsing.");
+        sh_println("It is designed to test chitin's arg parsing.");
         sh_println("Use it like this:");
         sh_println("\"$ test command arg1 arg2 arg3\"");
         sh_println("");
@@ -92,7 +92,7 @@ void sh_test(int argc, char **argv) {
             // printf("%u - \"%s\" [len:%u]\r\n", i, argv[i], str_len(argv[i]));
             printf("%u - \"", i);
             sh_print(argv[i]);
-            printf("\" [len:%u]\r\n", (uint16_t)strlen(argv[i]));
+            printf("\" [len:%u]\r\n", strlen(argv[i]));
         }
     }
     sh_println("-----------------------------------------------");

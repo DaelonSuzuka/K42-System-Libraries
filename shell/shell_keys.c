@@ -1,4 +1,5 @@
 #include "shell_keys.h"
+#include "os/system_time.h"
 #include "shell.h"
 #include "shell_config.h"
 #include <stdbool.h>
@@ -287,12 +288,12 @@ static key_t decode_escape_sequence(sequence_t *sequence) {
 static sequence_t intercept_escape_sequence(void) {
     sequence_t sequence = new_sequence();
 
-    // system_time_t startTime = get_current_time();
-    // while (time_since(startTime) < 5) {
-    int count = 0;
-    while (1) {
+    system_time_t startTime = get_current_time();
+    while (time_since(startTime) < 5) {
+        // int count = 0;
+        // while (1) {
         // check for a new character
-        sequence.buffer[sequence.length] = getchar();
+        sequence.buffer[sequence.length] = getch();
         // if valid character, move to next spot in buffer
         if (sequence.buffer[sequence.length] != 0) {
             sequence.length++;
@@ -303,11 +304,11 @@ static sequence_t intercept_escape_sequence(void) {
             }
         }
 
-        count++;
-        if (count == 5000) {
-            printf("timeout\r\n");
-            break;
-        }
+        // count++;
+        // if (count == 5000) {
+        //     printf("timeout\r\n");
+        //     break;
+        // }
     }
 
     return sequence;
