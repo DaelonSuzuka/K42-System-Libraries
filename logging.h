@@ -45,46 +45,71 @@ extern void print_log_header(uint8_t msgLevel, const char *file, int line);
 
 #define log_register() log_register__(__FILE__, &LOG_LEVEL)
 
-#define LOG_TRACE(LOG_MESSAGE_BLOCK)                                           \
+#define ON_TRACE(BLOCK)                                                        \
+    if (L_TRACE <= LOG_LEVEL) {                                                \
+        BLOCK                                                                  \
+    }
+#define ON_DEBUG(BLOCK)                                                        \
+    if (L_DEBUG <= LOG_LEVEL) {                                                \
+        BLOCK                                                                  \
+    }
+#define ON_INFO(BLOCK)                                                         \
+    if (L_INFO <= LOG_LEVEL) {                                                 \
+        BLOCK                                                                  \
+    }
+#define ON_WARN(BLOCK)                                                         \
+    if (L_WARN <= LOG_LEVEL) {                                                 \
+        BLOCK                                                                  \
+    }
+#define ON_ERROR(BLOCK)                                                        \
+    if (L_ERROR <= LOG_LEVEL) {                                                \
+        BLOCK                                                                  \
+    }
+#define ON_FATAL(BLOCK)                                                        \
+    if (L_FATAL <= LOG_LEVEL) {                                                \
+        BLOCK                                                                  \
+    }
+
+#define LOG_TRACE(BLOCK)                                                       \
     if (L_TRACE <= LOG_LEVEL) {                                                \
         print_log_header(L_TRACE, __FILE__, __LINE__);                         \
-        LOG_MESSAGE_BLOCK                                                      \
+        BLOCK                                                                  \
     }
-#define LOG_DEBUG(LOG_MESSAGE_BLOCK)                                           \
+#define LOG_DEBUG(BLOCK)                                                       \
     if (L_DEBUG <= LOG_LEVEL) {                                                \
         print_log_header(L_DEBUG, __FILE__, __LINE__);                         \
-        LOG_MESSAGE_BLOCK                                                      \
+        BLOCK                                                                  \
     }
-#define LOG_INFO(LOG_MESSAGE_BLOCK)                                            \
+#define LOG_INFO(BLOCK)                                                        \
     if (L_INFO <= LOG_LEVEL) {                                                 \
         print_log_header(L_INFO, __FILE__, __LINE__);                          \
-        LOG_MESSAGE_BLOCK                                                      \
+        BLOCK                                                                  \
     }
-#define LOG_WARN(LOG_MESSAGE_BLOCK)                                            \
+#define LOG_WARN(BLOCK)                                                        \
     if (L_WARN <= LOG_LEVEL) {                                                 \
         print_log_header(L_WARN, __FILE__, __LINE__);                          \
-        LOG_MESSAGE_BLOCK                                                      \
+        BLOCK                                                                  \
     }
-#define LOG_ERROR(LOG_MESSAGE_BLOCK)                                           \
+#define LOG_ERROR(BLOCK)                                                       \
     if (L_ERROR <= LOG_LEVEL) {                                                \
         print_log_header(L_ERROR, __FILE__, __LINE__);                         \
-        LOG_MESSAGE_BLOCK                                                      \
+        BLOCK                                                                  \
     }
-#define LOG_FATAL(LOG_MESSAGE_BLOCK)                                           \
+#define LOG_FATAL(BLOCK)                                                       \
     if (L_FATAL <= LOG_LEVEL) {                                                \
         print_log_header(L_FATAL, __FILE__, __LINE__);                         \
-        LOG_MESSAGE_BLOCK                                                      \
+        BLOCK                                                                  \
     }
 
 #else // #ifdef LOGGING_ENABLED
 
 #define log_register()
-#define LOG_TRACE(LOG_MESSAGE_BLOCK)
-#define LOG_DEBUG(LOG_MESSAGE_BLOCK)
-#define LOG_INFO(LOG_MESSAGE_BLOCK)
-#define LOG_WARN(LOG_MESSAGE_BLOCK)
-#define LOG_ERROR(LOG_MESSAGE_BLOCK)
-#define LOG_FATAL(LOG_MESSAGE_BLOCK)
+#define LOG_TRACE(BLOCK)
+#define LOG_DEBUG(BLOCK)
+#define LOG_INFO(BLOCK)
+#define LOG_WARN(BLOCK)
+#define LOG_ERROR(BLOCK)
+#define LOG_FATAL(BLOCK)
 
 #endif // #ifdef LOGGING_ENABLED
 
@@ -146,7 +171,7 @@ typedef struct {
 
 extern log_database_t logDatabase;
 
-typedef struct LogFeatures{
+typedef struct LogFeatures {
     unsigned useShortNames : 1;
     unsigned printHeader : 1;
     unsigned printTimestamp : 1;
@@ -161,8 +186,15 @@ extern log_features_t logFeatures;
 // setup
 extern void logging_init(void);
 
-// modify a the log level for the given file
+// modify a the log level for the given fileID
 extern void log_level_edit(uint8_t fileID, uint8_t level);
+
+// modify a the log level for the given file shortname
+extern void set_log_level(const char *filename, uint8_t level);
+
+// future api
+extern void push_log_level(const char *filename, uint8_t level);
+extern void pop_log_level(const char *filename);
 
 // print the specified log level
 extern void print_log_level(uint8_t level);

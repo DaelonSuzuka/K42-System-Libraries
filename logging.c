@@ -74,10 +74,46 @@ void log_level_edit(uint8_t fileID, uint8_t level) {
     *logDatabase.file[fileID].levelPtr = level;
 }
 
+uint8_t look_up_file_id(const char *filename) {
+    for (uint8_t i = 0; i < logDatabase.numberOfFiles; i++) {
+        if (!strcmp(filename, logDatabase.file[i].shortName)) {
+            return i;
+        }
+    }
+
+    return 0;
+}
+
+void set_log_level(const char *filename, uint8_t level) {
+    uint8_t id = look_up_file_id(filename);
+
+    log_level_edit(id, level);
+}
+
+/* -------------------------------------------------------------------------- */
+
+static uint8_t savedLevel = 0;
+
+void push_log_level(const char *filename, uint8_t level) {
+    uint8_t id = look_up_file_id(filename);
+
+    savedLevel = *logDatabase.file[id].levelPtr;
+
+    log_level_edit(id, level);
+}
+
+void pop_log_level(const char *filename) {
+    uint8_t id = look_up_file_id(filename);
+    
+    log_level_edit(id, savedLevel);
+}
+
 void print_log_level(uint8_t level) {
     printf("%s%-6s", level_colors[level], level_names[level]);
     reset_text_attributes();
 }
+
+/* -------------------------------------------------------------------------- */
 
 void print_log_header(uint8_t msgLevel, const char *file, int line) {
     reset_text_attributes();
@@ -245,54 +281,54 @@ void decrease_level(void) {
 
 int8_t logedit_keys(key_t key) {
     switch (key.key) {
-        default:
-            return 0;
-        case UP:
-            if (selectedLine > 0) {
-                up_one_line();
-            }
-            return 0;
-        case DOWN:
-            if (selectedLine < logDatabase.numberOfFiles - 1) {
-                down_one_line();
-            }
-            return 0;
-        case LEFT:
-            if (selectedLevel > 0) {
-                decrease_level();
-            }
-            return 0;
-        case RIGHT:
-            if (selectedLevel < 6) { // todo: magic number
-                increase_level();
-            }
-            return 0;
-        case F1:
-            logFeatures.printTimestamp = !logFeatures.printTimestamp;
-            return 0;
-        case F2:
-            logFeatures.printLogLevel = !logFeatures.printLogLevel;
-            return 0;
-        case F3:
-            logFeatures.printFileName = !logFeatures.printFileName;
-            return 0;
-        case F4:
-            logFeatures.useShortNames = !logFeatures.useShortNames;
-            draw_logedit();
-            return 0;
-        case F5:
-            draw_logedit();
-            return 0;
-        case ENTER:
-            for (uint8_t i = 0; i < MAX_NUMBER_OF_FILES; i++) {
-                *logDatabase.file[i].levelPtr = newLogDatabase[i];
-            }
-            return -1;
-        case ESCAPE:
-            for (uint8_t i = 0; i < MAX_NUMBER_OF_FILES; i++) {
-                *logDatabase.file[i].levelPtr = oldLogDatabase[i];
-            }
-            return -1;
+    default:
+        return 0;
+    case UP:
+        if (selectedLine > 0) {
+            up_one_line();
+        }
+        return 0;
+    case DOWN:
+        if (selectedLine < logDatabase.numberOfFiles - 1) {
+            down_one_line();
+        }
+        return 0;
+    case LEFT:
+        if (selectedLevel > 0) {
+            decrease_level();
+        }
+        return 0;
+    case RIGHT:
+        if (selectedLevel < 6) { // todo: magic number
+            increase_level();
+        }
+        return 0;
+    case F1:
+        logFeatures.printTimestamp = !logFeatures.printTimestamp;
+        return 0;
+    case F2:
+        logFeatures.printLogLevel = !logFeatures.printLogLevel;
+        return 0;
+    case F3:
+        logFeatures.printFileName = !logFeatures.printFileName;
+        return 0;
+    case F4:
+        logFeatures.useShortNames = !logFeatures.useShortNames;
+        draw_logedit();
+        return 0;
+    case F5:
+        draw_logedit();
+        return 0;
+    case ENTER:
+        for (uint8_t i = 0; i < MAX_NUMBER_OF_FILES; i++) {
+            *logDatabase.file[i].levelPtr = newLogDatabase[i];
+        }
+        return -1;
+    case ESCAPE:
+        for (uint8_t i = 0; i < MAX_NUMBER_OF_FILES; i++) {
+            *logDatabase.file[i].levelPtr = oldLogDatabase[i];
+        }
+        return -1;
     }
 }
 
