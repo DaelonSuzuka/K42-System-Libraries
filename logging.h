@@ -104,6 +104,14 @@ extern void print_log_header(uint8_t msgLevel, const char *file, int line);
 #else // #ifdef LOGGING_ENABLED
 
 #define log_register()
+
+#define ON_TRACE(BLOCK)
+#define ON_DEBUG(BLOCK)
+#define ON_INFO(BLOCK)
+#define ON_WARN(BLOCK)
+#define ON_ERROR(BLOCK)
+#define ON_FATAL(BLOCK)
+
 #define LOG_TRACE(BLOCK)
 #define LOG_DEBUG(BLOCK)
 #define LOG_INFO(BLOCK)
