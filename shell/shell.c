@@ -64,6 +64,7 @@ void shell_init(void) {
 #endif
 
     // draw a prompt so the user know we're alive
+    sh_println();
     draw_shell_prompt();
 }
 
