@@ -17,8 +17,15 @@ extern void serial_port_init(uart_config_t *config);
 // Also needed for compiler provided printf
 extern void putch(char data);
 
+// annoyingly, getch return type changes between c89 and c99
+#ifdef __XC8_CC_C99__
+#define GETCH_RETURN_TYPE int
+#else
+#define GETCH_RETURN_TYPE char
+#endif
+
 // Read a single character from the console
-extern char getch(void);
+extern GETCH_RETURN_TYPE getch(void);
 
 // Print a string
 extern void print(const char *string);

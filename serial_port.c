@@ -18,7 +18,7 @@ void putch(char data) {
 }
 
 // Read a single character from the console
-char getch(void) {
+GETCH_RETURN_TYPE getch(void) {
     return uart.rx_char(); //
 }
 
