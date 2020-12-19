@@ -108,7 +108,7 @@ void read_slice(uint16_t address, uint8_t recordID, uint8_t *destination) {
     // printf("reading from %d\r\n", address);
 
     for (uint8_t i = 0; i < records[recordID].size; i++) {
-        destination[i] = (internal_eeprom_read(address + i));
+        destination[i] = ~(internal_eeprom_read(address + i));
     }
 }
 
@@ -137,7 +137,7 @@ void write_slice(uint16_t address, uint8_t recordID, uint8_t *source) {
     // printf("writing to %d\r\n", address);
 
     for (uint8_t i = 0; i < records[recordID].size; i++) {
-        internal_eeprom_write(address + i, source[i]);
+        internal_eeprom_write(address + i, ~source[i]);
     }
 }
 
