@@ -9,10 +9,12 @@ from pathlib import Path
 
 files = utils.all_files('src', '*.c')
 files.remove('src/os/shell/shell_builtin_commands.c')
-search_pattern = r'(?<=void ).*?(?=\(int argc, char \*\*argv\) \{)'
+search_pattern = r'(?<=void sh_).*?(?=\(int argc, char \*\*argv\) \{)'
 
 builtins = utils.search('src/os/shell/shell_builtin_commands.c', search_pattern)
+builtins = ['sh_' + c for c in builtins]
 commands = utils.search(files, search_pattern)
+commands = ['sh_' + c for c in commands]
 
 builtins = sorted(builtins)
 commands = sorted(commands)

@@ -1,5 +1,6 @@
 #include "logging.h"
 #include "os/libs/str_len.h"
+#include "os/shell/shell_command_utils.h"
 #include "serial_port.h"
 #include "shell/shell_utils.h"
 #include "system_time.h"
@@ -35,12 +36,16 @@ log_features_t logFeatures = {true, true, true, true, true};
 
 /* -------------------------------------------------------------------------- */
 
+void logedit(int argc, char **argv);
+
 void logging_init(void) {
     for (uint8_t i = 0; i < MAX_NUMBER_OF_FILES; i++) {
         logDatabase.file[i].name = NULL;
         logDatabase.file[i].levelPtr = NULL;
     }
     logDatabase.numberOfFiles = 0;
+
+    shell_register_command(logedit, "logedit");
 }
 
 void log_register__(const char *name, uint8_t *levelPtr) {
@@ -104,7 +109,7 @@ void push_log_level(const char *filename, uint8_t level) {
 
 void pop_log_level(const char *filename) {
     uint8_t id = look_up_file_id(filename);
-    
+
     log_level_edit(id, savedLevel);
 }
 
@@ -347,7 +352,7 @@ int8_t logedit_callback(char currentChar) {
 }
 
 // setup
-void sh_logedit(int argc, char **argv) {
+void logedit(int argc, char **argv) {
     // make a backup of the existing log database
     for (uint8_t i = 0; i < MAX_NUMBER_OF_FILES; i++) {
         oldLogDatabase[i] = *logDatabase.file[i].levelPtr;
