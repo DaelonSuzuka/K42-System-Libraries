@@ -63,6 +63,22 @@ bool usb_is_recieving(void) {
     return false;
 }
 
+/* -------------------------------------------------------------------------- */
+
+uint8_t find_key(json_buffer_t *buf, int8_t obj, int8_t hash) {
+    uint8_t index = 0;
+
+    for (uint8_t i = 0; i < buf->tokensParsed; i++) {
+        if (PARENT(i) == obj) {
+            if (HASH(i) == hash) {
+                index = i;
+                break;
+            }
+        }
+    }
+    return index;
+}
+
 /* ************************************************************************** */
 
 void message_timeout_error(void) {
@@ -138,6 +154,12 @@ void preprocess(json_buffer_t *buf) {
                 buf->tokens[i].hash = hash;
             }
         }
+    }
+
+    // grab message id
+    uint8_t msg_id = find_key(buf, ROOT_OBJECT, hash_message_id);
+    if (msg_id) {
+        _messageID = atoi(TOKEN(msg_id + 1));
     }
 }
 

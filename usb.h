@@ -45,9 +45,23 @@ typedef struct {
 } json_buffer_t;
 
 /* ************************************************************************** */
+// Message buffer traversal utilities
 
-//
+// helper macros to look up token fields
 #define TOKEN(number) &buf->data[buf->tokens[number].start]
+#define HASH(number) buf->tokens[number].hash
+#define TYPE(number) buf->tokens[number].type
+#define PARENT(number) buf->tokens[number].parent
+#define SIZE(number) buf->tokens[number].size
+#define START_PTR(number) &buf->data[buf->tokens[number].start]
+#define END_PTR(number) &buf->data[buf->tokens[number].end]
+
+// the index in json_buffer_t.tokens of the top level json object
+#define ROOT_OBJECT 0
+
+// return the index of the token matching the given hash
+// only searches inside the given json object
+extern uint8_t find_key(json_buffer_t *buf, int8_t obj, int8_t hash);
 
 /* ************************************************************************** */
 
