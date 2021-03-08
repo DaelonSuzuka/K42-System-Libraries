@@ -60,6 +60,17 @@ const json_node_t openBraceNode = {nControl, "{"};
 const json_node_t closeBraceNode = {nControl, "}"};
 
 /* ************************************************************************** */
+// message id stuff
+
+uint16_t _messageID = 0;
+
+const json_node_t messageID[] = {
+    {nKey, "message_id"},        //
+    {nU16, (void *)&_messageID}, //
+    {nControl, "\e"},            //
+};
+
+/* ************************************************************************** */
 // message preambles
 
 const json_node_t requestPreamble[] = {
@@ -90,6 +101,7 @@ const json_node_t responseOk[] = {
     {nControl, "{"},    //
     {nKey, "response"}, //
     {nString, "ok"},    //
+    {nNodeList, (void *)&messageID}, //
     {nControl, "\e"},   //
 };
 
@@ -97,6 +109,7 @@ const json_node_t responseError[] = {
     {nControl, "{"},    //
     {nKey, "response"}, //
     {nString, "error"}, //
+    {nNodeList, (void *)&messageID}, //
     {nControl, "\e"},   //
 };
 

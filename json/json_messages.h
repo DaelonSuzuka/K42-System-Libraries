@@ -33,6 +33,12 @@ extern const json_node_t openBraceNode;
 extern const json_node_t closeBraceNode;
 
 /* ************************************************************************** */
+// message id stuff
+
+extern uint16_t _messageID;
+extern const json_node_t messageID[];
+
+/* ************************************************************************** */
 // message preambles
 
 extern const json_node_t requestPreamble[];
