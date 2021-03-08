@@ -10,6 +10,7 @@
 
 typedef enum {} jsmntype_t;
 
+#define JSMN_PARENT_LINKS
 typedef struct {
     jsmntype_t type;
     int start;

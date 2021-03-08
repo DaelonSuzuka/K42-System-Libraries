@@ -1,7 +1,7 @@
 #ifdef USB_ENABLED
 
 #include "usb.h"
-#include "os/json/jsmn.h"
+#include "os/hash.h"
 #include "os/json/json_messages.h"
 #include "os/json/json_print.h"
 #include "os/libs/str_len.h"
@@ -9,7 +9,6 @@
 #include "os/serial_port.h"
 #include "os/usb_port.h"
 #include "peripherals/uart.h"
-#include "usb/hash.h"
 #include "usb/messages.h"
 #include <ctype.h>
 #include <stdint.h>
@@ -17,13 +16,17 @@
 #include <string.h>
 static uint8_t LOG_LEVEL = L_SILENT;
 
+#define JSMN_STATIC
+#define JSMN_PARENT_LINKS
+#include "os/json/jsmn.h"
+
 /* ************************************************************************** */
 
 static json_buffer_t buffer[2];
 static uint8_t active = 0;
 
 void reset_json_buffer(json_buffer_t *buffer) {
-    memset(buffer, 0, sizeof(json_buffer_t));
+    memset(buffer, 0, sizeof(json_buffer_t)); //
 }
 
 void swap_active_buffer(void) {
@@ -135,8 +138,7 @@ void preprocess(json_buffer_t *buf) {
     jsmn_init(&parser);
 
     // tokenize the buffer
-    buf->tokensParsed = jsmn_parse(&parser, buf->data, str_len(buf->data),
-                                   buf->tokens, MAX_TOKENS);
+    buf->tokensParsed = jsmn_parse(&parser, buf->data, str_len(buf->data), buf->tokens, MAX_TOKENS);
 
     // terminate each token in the original string
     for (uint8_t i = 0; i < buf->tokensParsed; i++) {
