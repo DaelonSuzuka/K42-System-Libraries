@@ -161,6 +161,7 @@ void preprocess(json_buffer_t *buf) {
     // grab message id
     uint8_t msg_id = find_key(buf, ROOT_OBJECT, hash_message_id);
     if (msg_id) {
+        needToSendID = true;
         _messageID = atoi(TOKEN(msg_id + 1));
     }
 }

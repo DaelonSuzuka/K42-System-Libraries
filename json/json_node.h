@@ -12,6 +12,7 @@
 */
 typedef enum {
     nControl,  //
+    nFunction, //
     nNodeList, //
     nObject,   // [*]
     nKey,      //
@@ -38,6 +39,14 @@ typedef struct {
     node_type_t type;
     void *contents;
 } json_node_t;
+
+// A pointer to a function that returns a pointer to an array of json_node_t
+const typedef json_node_t *(*node_function_ptr_t)(void);
+
+// A struct containing ^^^
+typedef struct {
+    node_function_ptr_t ptr;
+} node_function_t;
 
 /* ************************************************************************** */
 /*  JSON Nodes:
@@ -93,12 +102,12 @@ typedef struct {
                 "{"  - prints a '{', starting a new object
                 "}"  - prints a '}', ending the current object
                 "\e" - the end of the node array
-            
-            Now, I've actually played a trick on you. Go back and reread the 
-            example, matching each token in the output to the node that 
+
+            Now, I've actually played a trick on you. Go back and reread the
+            example, matching each token in the output to the node that
             generates it. Don't worry, I'll wait.
 
-            Find it? 
+            Find it?
 
             Token 8 in the output doesn't have a node. Don't panic, your JSON
             serializer hasn't developed sentience(yet), it just keeps track of

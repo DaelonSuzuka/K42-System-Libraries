@@ -63,6 +63,7 @@ const json_node_t closeBraceNode = {nControl, "}"};
 // message id stuff
 
 uint16_t _messageID = 0;
+bool needToSendID = true;
 
 const json_node_t messageID[] = {
     {nKey, "message_id"},        //
@@ -70,47 +71,61 @@ const json_node_t messageID[] = {
     {nControl, "\e"},            //
 };
 
+const json_node_t *_get_message_id(void) {
+    if (needToSendID) {
+        needToSendID = false;
+        return &messageID;
+    } else {
+        return NULL;
+    }
+}
+
+const node_function_t get_message_id = {_get_message_id};
+
 /* ************************************************************************** */
 // message preambles
 
 const json_node_t requestPreamble[] = {
-    {nControl, "{"},   //
-    {nKey, "request"}, //
-    {nControl, "{"},   //
-    {nControl, "\e"},  //
+    {nControl, "{"},                      //
+    {nFunction, (void *)&get_message_id}, //
+    {nKey, "request"},                    //
+    {nControl, "{"},                      //
+    {nControl, "\e"},                     //
 };
 
 const json_node_t updatePreamble[] = {
-    {nControl, "{"},  //
-    {nKey, "update"}, //
-    {nControl, "{"},  //
-    {nControl, "\e"}, //
+    {nControl, "{"},                      //
+    {nFunction, (void *)&get_message_id}, //
+    {nKey, "update"},                     //
+    {nControl, "{"},                      //
+    {nControl, "\e"},                     //
 };
 
 const json_node_t responsePreamble[] = {
-    {nControl, "{"},    //
-    {nKey, "response"}, //
-    {nControl, "{"},    //
-    {nControl, "\e"},   //
+    {nControl, "{"},                      //
+    {nFunction, (void *)&get_message_id}, //
+    {nKey, "response"},                   //
+    {nControl, "{"},                      //
+    {nControl, "\e"},                     //
 };
 
 /* ************************************************************************** */
 // standard responses
 
 const json_node_t responseOk[] = {
-    {nControl, "{"},    //
-    {nKey, "response"}, //
-    {nString, "ok"},    //
-    {nNodeList, (void *)&messageID}, //
-    {nControl, "\e"},   //
+    {nControl, "{"},                      //
+    {nFunction, (void *)&get_message_id}, //
+    {nKey, "response"},                   //
+    {nString, "ok"},                      //
+    {nControl, "\e"},                     //
 };
 
 const json_node_t responseError[] = {
-    {nControl, "{"},    //
-    {nKey, "response"}, //
-    {nString, "error"}, //
-    {nNodeList, (void *)&messageID}, //
-    {nControl, "\e"},   //
+    {nControl, "{"},                      //
+    {nFunction, (void *)&get_message_id}, //
+    {nKey, "response"},                   //
+    {nString, "error"},                   //
+    {nControl, "\e"},                     //
 };
 
 /* ************************************************************************** */

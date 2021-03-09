@@ -1,4 +1,5 @@
 #include "json_print.h"
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -51,54 +52,65 @@ static void evaluate_node_list(const json_node_t *nodeList); // forward dec
     a local char buffer, and then print that char buffer using the function
     pointer that was given to json_print() and copied into 'out'.
 */
-static void evaluate_node(const json_node_t *node) {
+
+static bool evaluate_node(const json_node_t *node) {
     char buffer[50] = {0};
+    const node_function_t *nodeFunc;
+    const json_node_t *nodeList;
 
     switch (node->type) {
-        case nNodeList:
-            evaluate_node_list((const json_node_t *)node->contents);
-            return;
-        case nKey:
-            print_json_string((char *)node->contents);
-            out(":");
-            return;
-        case nString:
-            print_json_string((char *)node->contents);
-            return;
-        case nFloat:
-            sprintf(&buffer[0], "%f", *(double *)node->contents);
-            out(buffer);
-            return;
-        case nU8:
-            sprintf(&buffer[0], "%u", *(uint8_t *)node->contents);
-            out(buffer);
-            return;
-        case nU16:
-            sprintf(&buffer[0], "%u", *(uint16_t *)node->contents);
-            out(buffer);
-            return;
-        case nU32:
-            sprintf(&buffer[0], "%lu", *(uint32_t *)node->contents);
-            out(buffer);
-            return;
-        case nS8:
-            sprintf(&buffer[0], "%d", *(int8_t *)node->contents);
-            out(buffer);
-            return;
-        case nS16:
-            sprintf(&buffer[0], "%d", *(int16_t *)node->contents);
-            out(buffer);
-            return;
-        case nS32:
-            sprintf(&buffer[0], "%ld", *(int32_t *)node->contents);
-            out(buffer);
-            return;
-        case nNull:
-            out("null");
-            return;
-        default: // type not supported
-            out("null");
-            return;
+    case nNodeList:
+        evaluate_node_list((const json_node_t *)node->contents);
+        return true;
+    case nFunction:
+        nodeFunc = (const node_function_t *)node->contents;
+        nodeList = nodeFunc->ptr();
+        if (nodeList) {
+            evaluate_node_list(nodeList);
+            return true;
+        }
+        return false;
+    case nKey:
+        print_json_string((char *)node->contents);
+        out(":");
+        return true;
+    case nString:
+        print_json_string((char *)node->contents);
+        return true;
+    case nFloat:
+        sprintf(&buffer[0], "%f", *(double *)node->contents);
+        out(buffer);
+        return true;
+    case nU8:
+        sprintf(&buffer[0], "%u", *(uint8_t *)node->contents);
+        out(buffer);
+        return true;
+    case nU16:
+        sprintf(&buffer[0], "%u", *(uint16_t *)node->contents);
+        out(buffer);
+        return true;
+    case nU32:
+        sprintf(&buffer[0], "%lu", *(uint32_t *)node->contents);
+        out(buffer);
+        return true;
+    case nS8:
+        sprintf(&buffer[0], "%d", *(int8_t *)node->contents);
+        out(buffer);
+        return true;
+    case nS16:
+        sprintf(&buffer[0], "%d", *(int16_t *)node->contents);
+        out(buffer);
+        return true;
+    case nS32:
+        sprintf(&buffer[0], "%ld", *(int32_t *)node->contents);
+        out(buffer);
+        return true;
+    case nNull:
+        out("null");
+        return true;
+    default: // type not supported
+        out("null");
+        return true;
     }
 }
 
@@ -189,31 +201,33 @@ static void evaluate_node_list(const json_node_t *list) {
         if (currentNode->type == nControl) {
             char controlChar = ((const char *)currentNode->contents)[0];
             switch (controlChar) {
-                case '{':
-                    braceDepth++;
-                    out("{");
-                    break;
-                case '}':
-                    braceDepth--;
-                    out("}");
-                    if (braceDepth == 0) {
-                        return;
-                    }
-                    if (nextNode->type != nControl) {
-                        out(",");
-                    }
-                    break;
-                case '\e':
-                    recursionCount--;
-                    if (recursionCount == 0) {
-                        while (braceDepth--) {
-                            out("}");
-                        }
-                    }
+            case '{':
+                braceDepth++;
+                out("{");
+                break;
+            case '}':
+                braceDepth--;
+                out("}");
+                if (braceDepth == 0) {
                     return;
+                }
+                if (nextNode->type != nControl) {
+                    out(",");
+                }
+                break;
+            case '\e':
+                recursionCount--;
+                if (recursionCount == 0) {
+                    while (braceDepth--) {
+                        out("}");
+                    }
+                }
+                return;
             }
         } else {
-            evaluate_node(currentNode);
+            if (!evaluate_node(currentNode)) {
+                continue;
+            }
 
             // printing a comma is a little complicated, see [0] for more info
             if (nextNode->type == nKey) {

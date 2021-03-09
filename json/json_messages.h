@@ -3,6 +3,7 @@
 
 #include "json_node.h"
 #include "json_print.h"
+#include <stdbool.h>
 #include <stdint.h>
 
 /* ************************************************************************** */
@@ -36,7 +37,9 @@ extern const json_node_t closeBraceNode;
 // message id stuff
 
 extern uint16_t _messageID;
+extern bool needToSendID;
 extern const json_node_t messageID[];
+extern const node_function_t get_message_id;
 
 /* ************************************************************************** */
 // message preambles
@@ -57,7 +60,6 @@ extern const json_node_t responseError[];
 extern const json_node_t serial_number[];
 extern const json_node_t software_version[];
 extern const json_node_t compilation_info[];
-
 
 extern const json_node_t deviceInfo[];
 
