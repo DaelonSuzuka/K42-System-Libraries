@@ -150,7 +150,7 @@ void preprocess(json_buffer_t *buf) {
         buf->tokens[i].hash = buf->tokens[i].type;
 
         if (buf->tokens[i].type == JSMN_STRING) {
-            int hash = hash_string(TOKEN(i));
+            int hash = compute_hash(TOKEN(i));
 
             if (hash != -1) {
                 buf->tokens[i].hash = hash;

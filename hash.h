@@ -38,7 +38,7 @@ func_contents = [
 ]
 
 func = code.Function(
-    name = 'hash_string',
+    name = 'compute_hash',
     return_type = enum.name,
     contents = func_contents,
     params = 'const char *string',
