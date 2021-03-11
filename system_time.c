@@ -1,8 +1,12 @@
 #include "system_time.h"
+#include "os/shell/shell_command_utils.h"
 #include "peripherals/numerically_controlled_oscillator.h"
 #include "peripherals/signal_measurement_timer.h"
 
 /* ************************************************************************** */
+
+// forward declaration
+extern void sh_clockmon(int argc, char **argv);
 
 void system_time_init(void) {
     nco1_set_pulse_frequency_mode(NCO_MODE_PULSE_FREQUENCY);
@@ -25,6 +29,10 @@ void system_time_init(void) {
     smt_start();
 
     smt_interrupt_enable();
+
+#ifdef DEVELOPMENT
+    shell_register_command(sh_clockmon, "clockmon");
+#endif
 }
 
 /* -------------------------------------------------------------------------- */
@@ -97,8 +105,6 @@ void delay_ms(system_time_t milliSeconds) {
 }
 
 /* ************************************************************************** */
-
-#include "os/shell/shell_command_utils.h"
 
 //
 #define CLOCK_CHECK_COOLDOWN 1000

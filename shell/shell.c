@@ -1,6 +1,6 @@
 #include "shell.h"
+#include "shell_builtins.h"
 #include "shell_command_processor.h"
-#include "shell_command_registration.h"
 #include "shell_cursor.h"
 #include "shell_history.h"
 #include "shell_keys.h"
@@ -59,9 +59,11 @@ void shell_init(void) {
     // shell history
     shell_history_init();
 
-#ifdef REGISTRATION_GENERATED_SUCCESSFULLY
-    register_all_shell_commands();
-#endif
+    // Register the builtins
+    shell_register_command(sh_help, "help");
+    shell_register_command(sh_reboot, "reboot");
+    shell_register_command(sh_test, "test");
+    shell_register_command(sh_version, "version");
 
     // draw a prompt so the user know we're alive
     sh_println("");

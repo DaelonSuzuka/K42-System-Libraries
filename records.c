@@ -1,5 +1,9 @@
 #include "records.h"
 #include "os/logging.h"
+#include "os/shell/shell.h"
+#include "os/shell/shell_command_utils.h"
+#include "os/shell/shell_keys.h"
+#include "os/shell/shell_utils.h"
 #include "peripherals/nonvolatile_memory.h"
 static uint8_t LOG_LEVEL = L_SILENT;
 
@@ -21,8 +25,7 @@ uint8_t numOfRecords = 0;
 void _print_record(uint8_t recordID) {
     printf("ID: %d start: %3d, size: %3d, length: %3d op: %3d \r\n", recordID,
            records[recordID].start, records[recordID].size,
-           records[recordID].length,
-           records[recordID].overprovision);
+           records[recordID].length, records[recordID].overprovision);
 }
 
 void _print_records(void) {
@@ -33,6 +36,9 @@ void _print_records(void) {
 }
 
 /* ************************************************************************** */
+
+// forward declaration
+extern void sh_records(int argc, char **argv);
 
 void records_init(uint16_t minAddress, uint16_t maxAddress) {
     // clear all the chunk data
@@ -48,6 +54,10 @@ void records_init(uint16_t minAddress, uint16_t maxAddress) {
     // TODO: implement maxAddress
 
     log_register();
+
+#ifdef DEVELOPMENT
+    shell_register_command(sh_records, "records");
+#endif
 }
 
 uint8_t create_new_record(uint16_t recordSize, uint16_t overprovisionFactor,
@@ -86,7 +96,6 @@ int16_t get_record_address(uint8_t recordID) {
         // printf("checking: %d (%d) \r\n", address,
         //        internal_eeprom_read(address));
         if (internal_eeprom_read(address) == 0) {
-
             // println("found");
             return address;
         }
@@ -170,7 +179,7 @@ void store_record(uint8_t recordID, uint8_t *source) {
         address += records[recordID].size + 1;
 
         uint16_t end = records[recordID].start + records[recordID].length;
-        if (address > end)  {
+        if (address > end) {
             address = records[recordID].start;
         }
 
@@ -181,13 +190,6 @@ void store_record(uint8_t recordID, uint8_t *source) {
         write_slice(address, recordID, source);
     }
 }
-
-/* ************************************************************************** */
-
-#include "os/shell/shell.h"
-#include "os/shell/shell_command_utils.h"
-#include "os/shell/shell_keys.h"
-#include "os/shell/shell_utils.h"
 
 /* ************************************************************************** */
 
