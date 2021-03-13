@@ -76,6 +76,6 @@ extern void judi_init(responder_t responder);
 extern bool judi_is_recieving(void);
 
 // call this often to service the USB port
-extern void judi_update(char currentChar);
+extern bool judi_update(char currentChar);
 
 #endif // _JUDI_H_

@@ -170,13 +170,18 @@ void preprocess(json_buffer_t *buf) {
 
 /* ************************************************************************** */
 
-void judi_update(char currentChar) {
+bool judi_update(char currentChar) {
     // return early if we don't have a valid character
     if (!isprint(currentChar)) {
-        return;
+        return false;
     }
 
     insert_character(&buffer[active], currentChar);
+
+    // 
+    if (buffer[active].length == 0) {
+        return false;
+    }
 
     // These conditions mean we've reached the end of a JSON object
     if ((buffer[active].length > 0) && (buffer[active].depth == 0)) {
@@ -214,6 +219,8 @@ void judi_update(char currentChar) {
 
         swap_active_buffer();
     }
+    
+    return true;
 }
 
 #endif
