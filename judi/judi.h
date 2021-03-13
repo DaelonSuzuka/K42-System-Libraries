@@ -1,5 +1,5 @@
-#ifndef _USB_H_
-#define _USB_H_
+#ifndef _JUDI_H_
+#define _JUDI_H_
 
 #include "os/system_time.h"
 #include "peripherals/uart.h"
@@ -70,12 +70,12 @@ extern uint8_t find_key(json_buffer_t *buf, int8_t obj, int8_t hash);
 typedef void (*responder_t)(json_buffer_t *buf);
 
 // initialize the USB port by creating and passing in a UART interface object
-extern void usb_init(uart_config_t *config, responder_t responder);
+extern void judi_init(responder_t responder);
 
 // returns true if a message is currently being recieved
-extern bool usb_is_recieving(void);
+extern bool judi_is_recieving(void);
 
 // call this often to service the USB port
-extern void usb_update(void);
+extern void judi_update(char currentChar);
 
-#endif // _USB_H_
+#endif // _JUDI_H_

@@ -4,18 +4,9 @@ from pathlib import Path
 
 search_pattern = r'(?<=hash_).*?(?=[:)])'
 
-strings = utils.search('src/os/usb.c', search_pattern)
-bad_chars = ['(', ')', ' ']
-bad_strings = []
-for s in strings:
-    for c in bad_chars:
-        if c in s:
-            bad_strings.append(s)
+strings = utils.search('src/usb/messages.c', search_pattern)
+strings.append('message_id')
 
-for s in bad_strings:
-    strings.remove(s)
-
-strings.extend(utils.search('src/usb/messages.c', search_pattern))
 strings = list(dict.fromkeys(strings)) # strip duplicates
 
 prefix = 'hash_'

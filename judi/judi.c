@@ -1,9 +1,10 @@
 #ifdef USB_ENABLED
 
-#include "usb.h"
-#include "os/hash.h"
-#include "os/json/json_messages.h"
+#include "judi.h"
 #include "os/json/json_print.h"
+#include "os/judi/hash.h"
+#include "os/judi/judi_messages.h"
+#include "os/judi/message_id.h"
 #include "os/libs/str_len.h"
 #include "os/logging.h"
 #include "os/serial_port.h"
@@ -45,9 +46,8 @@ void swap_active_buffer(void) {
 
 static responder_t response_function;
 
-void usb_init(uart_config_t *config, responder_t responder) {
+void judi_init(responder_t responder) {
     // pass the uart down to the usb port driver
-    usb_port_init(config);
 
     response_function = responder;
 
@@ -59,7 +59,7 @@ void usb_init(uart_config_t *config, responder_t responder) {
     log_register();
 }
 
-bool usb_is_recieving(void) {
+bool judi_is_recieving(void) {
     if (buffer[active].depth > 0) {
         return true;
     }
@@ -138,7 +138,8 @@ void preprocess(json_buffer_t *buf) {
     jsmn_init(&parser);
 
     // tokenize the buffer
-    buf->tokensParsed = jsmn_parse(&parser, buf->data, str_len(buf->data), buf->tokens, MAX_TOKENS);
+    buf->tokensParsed = jsmn_parse(&parser, buf->data, str_len(buf->data),
+                                   buf->tokens, MAX_TOKENS);
 
     // terminate each token in the original string
     for (uint8_t i = 0; i < buf->tokensParsed; i++) {
@@ -158,19 +159,12 @@ void preprocess(json_buffer_t *buf) {
         }
     }
 
-    // grab message id
-    uint8_t msg_id = find_key(buf, ROOT_OBJECT, hash_message_id);
-    if (msg_id) {
-        needToSendID = true;
-        _messageID = atoi(TOKEN(msg_id + 1));
-    }
+    grab_message_id(buf);
 }
 
 /* ************************************************************************** */
 
-void usb_update(void) {
-    char currentChar = usb_getch();
-
+void judi_update(char currentChar) {
     // return early if we don't have a valid character
     if (!isprint(currentChar)) {
         return;
