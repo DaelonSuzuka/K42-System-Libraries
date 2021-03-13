@@ -23,18 +23,25 @@ static uint8_t LOG_LEVEL = L_SILENT;
 
 /* ************************************************************************** */
 
-static json_buffer_t buffer[2];
+#define NUMBER_OF_BUFFERS 1
+
+static json_buffer_t buffer[NUMBER_OF_BUFFERS];
 static uint8_t active = 0;
 
 void reset_json_buffer(json_buffer_t *buffer) {
     memset(buffer, 0, sizeof(json_buffer_t)); //
 }
 
+void reset_all_json_buffers(void) {
+    for (int i = 0; i < NUMBER_OF_BUFFERS; i++) {
+        reset_json_buffer(&buffer[i]);
+    }
+}
+
 void swap_active_buffer(void) {
-    // swap which buffer is active
-    if (active == 0) {
-        active = 1;
-    } else {
+    // switch to the next buffer
+    active++;
+    if (active == NUMBER_OF_BUFFERS) {
         active = 0;
     }
 
@@ -44,16 +51,15 @@ void swap_active_buffer(void) {
 
 /* ************************************************************************** */
 
-static responder_t response_function;
+static responder_t response_function = NULL;
 
 void judi_init(responder_t responder) {
-    // pass the uart down to the usb port driver
-
+    // stash the responder for later
     response_function = responder;
 
-    reset_json_buffer(&buffer[0]);
-    reset_json_buffer(&buffer[1]);
+    reset_all_json_buffers();
 
+    // initialize the message builder
     reset_message();
 
     log_register();
@@ -193,14 +199,16 @@ void judi_update(char currentChar) {
         preprocess(&buffer[active]);
         LOG_INFO({
             print("Preprocessing completed in: ");
-            time = time_since(time);
+            time = time_since(buffer[active].messageStartTime);
             printf("%lu mS\r\n", time);
         });
 
-        response_function(&buffer[active]);
+        if (response_function) {
+            response_function(&buffer[active]);
+        }
         LOG_INFO({
             print("Response completed in: ");
-            time = time_since(time);
+            time = time_since(buffer[active].messageStartTime);
             printf("%lu mS\r\n", time);
         });
 
