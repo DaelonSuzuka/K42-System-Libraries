@@ -18,6 +18,7 @@ typedef enum {
     nKey,      //
     nString,   //
     nFloat,    //
+    nFloat_p2,  //
     nDouble,   // [*]
     nU8,       // [*]
     nU16,      //

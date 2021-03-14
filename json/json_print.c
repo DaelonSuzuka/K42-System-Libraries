@@ -81,6 +81,10 @@ static bool evaluate_node(const json_node_t *node) {
         sprintf(&buffer[0], "%f", *(double *)node->contents);
         out(buffer);
         return true;
+    case nFloat_p2:
+        sprintf(&buffer[0], "%.2f", *(double *)node->contents);
+        out(buffer);
+        return true;
     case nU8:
         sprintf(&buffer[0], "%u", *(uint8_t *)node->contents);
         out(buffer);
