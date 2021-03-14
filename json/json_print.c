@@ -53,20 +53,21 @@ static void evaluate_node_list(const json_node_t *nodeList); // forward dec
     pointer that was given to json_print() and copied into 'out'.
 */
 
+// we need to stash this to properly handle commas later
+static const json_node_t *funcNodeResult = NULL;
+
 static bool evaluate_node(const json_node_t *node) {
     char buffer[50] = {0};
-    const node_function_t *nodeFunc;
-    const json_node_t *nodeList;
 
     switch (node->type) {
     case nNodeList:
         evaluate_node_list((const json_node_t *)node->contents);
         return true;
     case nFunction:
-        nodeFunc = (const node_function_t *)node->contents;
-        nodeList = nodeFunc->ptr();
-        if (nodeList) {
-            evaluate_node_list(nodeList);
+        // an nFunction node is actually evaluated in the comma handling section
+        // of evaluate_node_list()
+        if (funcNodeResult) {
+            evaluate_node_list(funcNodeResult);
             return true;
         }
         return false;
@@ -241,6 +242,13 @@ static void evaluate_node_list(const json_node_t *list) {
                 if (lookAhead->type == nKey) {
                     out(",");
                 }
+            } else if (nextNode->type == nFunction) {
+                funcNodeResult = ((const node_function_t *)nextNode->contents)->ptr();
+                if (funcNodeResult) {
+                    if (funcNodeResult->type == nKey) {
+                        out(",");
+                    }
+                }
             }
         }
     }
@@ -252,11 +260,6 @@ static void evaluate_node_list(const json_node_t *list) {
     time until we're done. Each node is evaluated one by one and its contents
     converted to a string and passed to the printing function defined as
     'destination'.
-
-
-
-
-
 */
 void json_print(printer_t destination, const json_node_t *nodeList) {
     // copy the destination pointer to a static variable, so we don't have to
