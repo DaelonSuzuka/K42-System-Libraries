@@ -7,6 +7,7 @@
 
 // forward declaration
 extern void sh_clockmon(int argc, char **argv);
+extern void sh_uptime(int argc, char **argv);
 
 void system_time_init(void) {
     nco1_set_pulse_frequency_mode(NCO_MODE_PULSE_FREQUENCY);
@@ -32,6 +33,7 @@ void system_time_init(void) {
 
 #ifdef DEVELOPMENT
     shell_register_command(sh_clockmon, "clockmon");
+    shell_register_command(sh_uptime, "uptime");
 #endif
 }
 
@@ -126,4 +128,23 @@ void sh_clockmon(int argc, char **argv) {
     println("entering clockmon");
 
     shell_register_callback(clockmon_callback);
+}
+
+/* -------------------------------------------------------------------------- */
+
+void sh_uptime(int argc, char **argv) {
+    system_time_t currentTime = get_current_time();
+    system_time_t milliseconds = currentTime;
+    uint32_t seconds = milliseconds / 1000;
+    uint32_t minutes = seconds / 60;
+    uint32_t hours = minutes / 60;
+
+    milliseconds = milliseconds % 1000;
+    seconds = seconds % 60;
+    minutes = minutes % 60;
+    hours = hours % 24;
+
+    printf(TXT_BLUE "[%lu]" TXT_RESET " uptime: %luH %luM %luS %lumS",
+           currentTime, hours, minutes, seconds, milliseconds);
+    println("");
 }
