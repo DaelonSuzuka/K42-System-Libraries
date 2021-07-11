@@ -115,3 +115,67 @@ void sh_version(int argc, char **argv) {
     printf(" using XC8 v%u", __XC8_VERSION);
     println("");
 }
+
+/* -------------------------------------------------------------------------- */
+
+// displays a color rendering demo
+void sh_colors(int argc, char **argv) {
+    sh_println("-----------------------------------------------");
+
+    println(TXT_BLACK "BLACK "     //
+            TXT_RED "RED "         //
+            TXT_GREEN "GREEN "     //
+            TXT_YELLOW "YELLOW "   //
+            TXT_BLUE "BLUE "       //
+            TXT_MAGENTA "MAGENTA " //
+            TXT_CYAN "CYAN "       //
+            TXT_WHITE "WHITE "     //
+            TXT_RESET "| BASE"     //
+    );
+
+    println(TXT_BR_BLACK "BLACK "     //
+            TXT_BR_RED "RED "         //
+            TXT_BR_GREEN "GREEN "     //
+            TXT_BR_YELLOW "YELLOW "   //
+            TXT_BR_BLUE "BLUE "       //
+            TXT_BR_MAGENTA "MAGENTA " //
+            TXT_BR_CYAN "CYAN "       //
+            TXT_BR_WHITE "WHITE "     //
+            TXT_RESET "| BRIGHT"      //
+    );
+
+    println(TXT_BOLD_BLACK "BLACK "     //
+            TXT_BOLD_RED "RED "         //
+            TXT_BOLD_GREEN "GREEN "     //
+            TXT_BOLD_YELLOW "YELLOW "   //
+            TXT_BOLD_BLUE "BLUE "       //
+            TXT_BOLD_MAGENTA "MAGENTA " //
+            TXT_BOLD_CYAN "CYAN "       //
+            TXT_BOLD_WHITE "WHITE "     //
+            TXT_RESET "| BOLD"          //
+    );
+
+    println(TXT_BG_BLACK "BLACK "               //
+            TXT_BLACK TXT_BG_RED "RED "         //
+            TXT_BLACK TXT_BG_GREEN "GREEN "     //
+            TXT_BLACK TXT_BG_YELLOW "YELLOW "   //
+            TXT_BLACK TXT_BG_BLUE "BLUE "       //
+            TXT_BLACK TXT_BG_MAGENTA "MAGENTA " //
+            TXT_BLACK TXT_BG_CYAN "CYAN "       //
+            TXT_BLACK TXT_BG_WHITE "WHITE "     //
+            TXT_RESET "| BACKGROUNDS"           //
+    );
+
+    println(TXT_BLACK TXT_BG_BR_BLACK "BLACK "     //
+            TXT_BLACK TXT_BG_BR_RED "RED "         //
+            TXT_BLACK TXT_BG_BR_GREEN "GREEN "     //
+            TXT_BLACK TXT_BG_BR_YELLOW "YELLOW "   //
+            TXT_BLACK TXT_BG_BR_BLUE "BLUE "       //
+            TXT_BLACK TXT_BG_BR_MAGENTA "MAGENTA " //
+            TXT_BLACK TXT_BG_BR_CYAN "CYAN "       //
+            TXT_BLACK TXT_BG_BR_WHITE "WHITE "     //
+            TXT_RESET "| BACKGROUNDS, BRIGHT"      //
+    );
+
+    sh_println("-----------------------------------------------");
+}

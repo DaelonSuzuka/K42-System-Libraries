@@ -13,8 +13,8 @@
 // Shell prompt options
 #define SHELL_COLOR_ENABLED
 
-#define SHELL_PROMPT_COLOR "\033[32m"
-#define SHELL_PROMPT_RESET "\033[37m"
+#define SHELL_PROMPT_COLOR "\033[0;32;40m"
+#define SHELL_PROMPT_RESET "\033[0;37;40m"
 #define SHELL_PROMPT_CHARACTER "$"
 #define SHELL_PROMPT_LENGTH 2
 

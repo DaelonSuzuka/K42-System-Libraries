@@ -4,13 +4,14 @@
 /* ************************************************************************** */
 
 #include "shell.h"
+#include "shell_colors.h"
 #include <stdio.h>
 
 /* ************************************************************************** */
 // terminal control escape sequences
 
 // reset text colors to default (no background, white text)
-#define reset_text_attributes() sh_print("\033[0;37;40m")
+#define reset_text_attributes() sh_print(TXT_RESET)
 
 // swap text and background colors
 #define invert_text_attribute() sh_print("\033[7m");

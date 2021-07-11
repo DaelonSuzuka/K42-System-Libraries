@@ -64,6 +64,7 @@ void shell_init(void) {
     shell_register_command(sh_reboot, "reboot");
     shell_register_command(sh_test, "test");
     shell_register_command(sh_version, "version");
+    shell_register_command(sh_colors, "colors");
 
     // draw a prompt so the user know we're alive
     sh_println("");
