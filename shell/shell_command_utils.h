@@ -7,6 +7,7 @@
 #include "shell.h"
 #include "shell_command_processor.h"
 #include "shell_keys.h"
+#include "shell_utils.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
