@@ -13,8 +13,15 @@ void serial_port_init(uart_config_t *config) {
 
 // Print a single character to the console
 // Also needed for compiler provided printf
+
+// this is a horrible workaround for uart.tx_char() being magically broken
+// TODO: definitely have to figure out what's happening here
+char wtf[2] = {0, 0};
+
 void putch(char data) {
-    uart.tx_char(data); //
+    wtf[0] = data;
+    print(wtf);
+    // uart.tx_char(data); //
 }
 
 // Read a single character from the console
