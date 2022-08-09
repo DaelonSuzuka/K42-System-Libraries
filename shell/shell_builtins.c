@@ -109,9 +109,11 @@ void sh_version(int argc, char **argv) {
 
     printf("%s %s", &productName, &productVersion);
     println("");
+    printf("%s", &processorModel);
+    println("");
     printf("Chitin v%s", SHELL_VERSION);
     println("");
-    printf("Compiled on %s at %s", __DATE__, __TIME__);
+    printf("Compiled on %s at %s", &compileDate, &compileTime);
     printf(" using XC8 v%u", __XC8_VERSION);
     println("");
 }
