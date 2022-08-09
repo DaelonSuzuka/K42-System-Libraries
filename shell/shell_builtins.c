@@ -5,6 +5,7 @@
 #include "os/system_time.h"
 #include "shell_command_utils.h"
 #include "shell_config.h"
+#include "shell_cursor.h"
 #include "system.h"
 
 /* ************************************************************************** */
@@ -14,6 +15,13 @@ void sh_help(int argc, char **argv) {
     sh_println("-----------------------------------------------");
     print_command_list();
     sh_println("-----------------------------------------------");
+}
+
+/* -------------------------------------------------------------------------- */
+
+void sh_clear(int argc, char **argv) {
+    term_reset_screen();
+    term_cursor_set(0, 0);
 }
 
 /* -------------------------------------------------------------------------- */

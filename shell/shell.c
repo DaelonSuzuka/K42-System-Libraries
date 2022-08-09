@@ -61,6 +61,7 @@ void shell_init(void) {
 
     // Register the builtins
     shell_register_command(sh_help, "help");
+    shell_register_command(sh_clear, "clear");
     shell_register_command(sh_reboot, "reboot");
     shell_register_command(sh_test, "test");
     shell_register_command(sh_version, "version");
