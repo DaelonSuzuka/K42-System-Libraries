@@ -1,5 +1,3 @@
-#include "os/json/json_print.h"
-#include "os/judi/judi_messages.h"
 #include "os/libs/str_len.h"
 #include "os/serial_port.h"
 #include "os/system_time.h"
@@ -109,12 +107,6 @@ void sh_test(int argc, char **argv) {
 /* -------------------------------------------------------------------------- */
 
 void sh_version(int argc, char **argv) {
-    if ((argc == 2) && (!strcmp(argv[1], "-j"))) {
-        json_print(print, deviceInfo);
-        println("");
-        return;
-    }
-
     printf("%s %s", &productName, &productVersion);
     println("");
     printf("%s", &processorModel);
