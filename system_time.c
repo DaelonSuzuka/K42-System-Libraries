@@ -138,13 +138,14 @@ void sh_uptime(int argc, char **argv) {
     uint32_t seconds = milliseconds / 1000;
     uint32_t minutes = seconds / 60;
     uint32_t hours = minutes / 60;
+    uint32_t days = hours / 24;
 
     milliseconds = milliseconds % 1000;
     seconds = seconds % 60;
     minutes = minutes % 60;
     hours = hours % 24;
 
-    printf(TXT_BLUE "[%lu]" TXT_RESET " uptime: %luH %luM %luS %lumS",
-           currentTime, hours, minutes, seconds, milliseconds);
+    printf(TXT_BLUE "[%lu]" TXT_RESET " uptime: %luD %luH %luM %luS %lumS",
+           currentTime, days, hours, minutes, seconds, milliseconds);
     println("");
 }
