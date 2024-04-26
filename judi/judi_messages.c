@@ -1,5 +1,6 @@
 #include "judi_messages.h"
 #include "message_id.h"
+#include "os/system_information.h"
 #include "peripherals/device_information.h"
 #include "system.h"
 #include <string.h>
@@ -35,19 +36,19 @@ const json_node_t responsePreamble[] = {
 // standard responses
 
 const json_node_t responseOk[] = {
-    {nControl, "{"},                      //
-    {MESSAGE_ID_NODE}, //
-    {nKey, "response"},                   //
-    {nString, "ok"},                      //
-    {nControl, "\e"},                     //
+    {nControl, "{"},    //
+    {MESSAGE_ID_NODE},  //
+    {nKey, "response"}, //
+    {nString, "ok"},    //
+    {nControl, "\e"},   //
 };
 
 const json_node_t responseError[] = {
-    {nControl, "{"},                      //
-    {MESSAGE_ID_NODE}, //
-    {nKey, "response"},                   //
-    {nString, "error"},                   //
-    {nControl, "\e"},                     //
+    {nControl, "{"},    //
+    {MESSAGE_ID_NODE},  //
+    {nKey, "response"}, //
+    {nString, "error"}, //
+    {nControl, "\e"},   //
 };
 
 /* ************************************************************************** */

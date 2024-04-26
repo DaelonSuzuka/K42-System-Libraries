@@ -2,6 +2,7 @@
 #include "os/judi/judi_messages.h"
 #include "os/libs/str_len.h"
 #include "os/serial_port.h"
+#include "os/system_information.h"
 #include "os/system_time.h"
 #include "shell_command_utils.h"
 #include "shell_config.h"
