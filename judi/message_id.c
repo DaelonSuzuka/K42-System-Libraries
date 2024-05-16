@@ -56,6 +56,8 @@ const json_node_t messageIdNode = {nFunction, (void *)&get_message_id};
 
 // scans the json buffer for a message id field and grabs the id if present
 void grab_message_id(json_buffer_t *buf) {
+    needToSendID = false;
+
     // grab message id
     uint8_t msg_id = find_key(buf, ROOT_OBJECT, hash_message_id);
     if (msg_id) {
