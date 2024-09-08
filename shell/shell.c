@@ -1,4 +1,5 @@
 #include "shell.h"
+#include "shell/shell.h"
 #include "shell_builtins.h"
 #include "shell_command_processor.h"
 #include "shell_cursor.h"
@@ -6,6 +7,7 @@
 #include "shell_keys.h"
 #include "shell_utils.h"
 #include <ctype.h>
+#include <stdint.h>
 #include <string.h>
 
 /* ************************************************************************** */
@@ -17,8 +19,12 @@ shell_line_t shell;
 
 shell_callback_t shellCallback;
 
+shell_callback_settings_t shellCallbackSettings;
+
 void shell_register_callback(shell_callback_t callback) {
     shellCallback = callback;
+    // shellCallbackSettings.callback = callback;
+    shellCallbackSettings.fullscreen = 1;
 }
 
 /*  Program termination
@@ -31,11 +37,15 @@ void shell_register_callback(shell_callback_t callback) {
 static void terminate_current_program(void) {
     shell_register_callback(NULL);
 
-    reset_text_attributes();
-    term_reset_screen();
-    term_cursor_set(0, 0);
+    if (shellCallbackSettings.fullscreen) {
+        reset_text_attributes();
+        term_reset_screen();
+        term_cursor_set(0, 0);
+        term_show_cursor();
+    } else {
+        sh_println("");
+    }
     draw_shell_prompt();
-    term_show_cursor();
 }
 
 /* -------------------------------------------------------------------------- */
@@ -133,8 +143,7 @@ void process_escape_sequence(key_t key) {
         case CTRL:
             do {
                 move_cursor_right(&shell);
-            } while (shell.buffer[shell.cursor] != ' ' &&
-                     shell.cursor < shell.length);
+            } while (shell.buffer[shell.cursor] != ' ' && shell.cursor < shell.length);
             return;
         }
     case HOME:

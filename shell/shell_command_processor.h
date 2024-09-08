@@ -24,6 +24,13 @@ extern void shell_register_command(command_function_t function, const char *comm
 // Pointer to a shell callback
 typedef int8_t (*shell_callback_t)(char currentChar);
 
+typedef struct {
+    // shell_callback_t callback;
+    unsigned fullscreen : 1;
+} shell_callback_settings_t;
+
+extern shell_callback_settings_t shellCallbackSettings;
+
 extern void shell_register_callback(shell_callback_t callback);
 
 /* ************************************************************************** */
