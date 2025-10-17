@@ -12,13 +12,14 @@ extern void sh_uptime(int argc, char **argv);
 void system_time_init(void) {
     nco1_set_pulse_frequency_mode(NCO_MODE_PULSE_FREQUENCY);
 
+    // TODO: don't hardcode this, have the project set it in system.c
     // use 500khz MFINTOSC
-    // nco1_set_clock_source(NCO_CLOCK_SOURCE_MFINTOSC_500);
-    // nco1_set_incrementor(0x000831);
+    nco1_set_clock_source(NCO_CLOCK_SOURCE_MFINTOSC_500);
+    nco1_set_incrementor(0x000831);
 
     // use 32khz LFINTOSC
-    nco1_set_clock_source(NCO_CLOCK_SOURCE_LFINTOSC);
-    nco1_set_incrementor(0x008421);
+    // nco1_set_clock_source(NCO_CLOCK_SOURCE_LFINTOSC);
+    // nco1_set_incrementor(0x008421);
 
     nco1_enable();
 
