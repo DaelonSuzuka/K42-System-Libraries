@@ -160,7 +160,7 @@ void store_record(uint8_t recordID, uint8_t *source) {
 
     // assemble our records
     uint8_t existingData[MAX_RECORD_SIZE];
-    read_slice(address, recordID, &existingData);
+    read_slice(address, recordID, &existingData[0]);
 
     // make sure what we're trying to save is different
     bool recordsAreDifferent = false;

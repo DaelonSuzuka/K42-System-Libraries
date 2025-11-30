@@ -8,7 +8,13 @@
 
 /* ************************************************************************** */
 
-typedef enum {} jsmntype_t;
+typedef enum {
+    JSMN_UNDEFINED = 0, //
+    JSMN_OBJECT = 1,
+    JSMN_ARRAY = 2,
+    JSMN_STRING = 3,
+    JSMN_PRIMITIVE = 4
+} jsmntype_t;
 
 #define JSMN_PARENT_LINKS
 typedef struct {
