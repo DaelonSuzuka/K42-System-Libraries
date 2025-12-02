@@ -16,8 +16,14 @@ typedef struct {
     const char *command;         // The command that needs to be typed
 } shell_command_t;
 
+#ifdef LOGGING_ENABLED
 // register a command and associate it with a name
 extern void shell_register_command(command_function_t function, const char *command);
+
+#else
+    // dummy macro to support compiling when shell is disabled
+    #define shell_register_command(FUNCTION, COMMAND)
+#endif
 
 /* ************************************************************************** */
 
