@@ -18,7 +18,7 @@ extern void serial_port_init(uart_config_t *config);
 extern void putch(char data);
 
 // annoyingly, getch return type changes between c89 and c99
-#ifdef __XC8_CC_C99__
+#if defined __XC8_CC_C99__ || defined __XC8_C99__
 #define GETCH_RETURN_TYPE int
 #else
 #define GETCH_RETURN_TYPE char
