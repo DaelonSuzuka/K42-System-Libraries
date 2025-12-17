@@ -8,6 +8,7 @@
 
 /* ************************************************************************** */
 
+#ifndef SKIP_JUDI_ENUMS
 typedef enum {
     JSMN_UNDEFINED = 0, //
     JSMN_OBJECT = 1,
@@ -27,6 +28,7 @@ typedef struct {
     int parent;
 #endif
 } jsmntok_t;
+#endif
 
 // Incoming JSON objects MUST BE shorter than this length
 #define JSON_BUFFER_SIZE 256

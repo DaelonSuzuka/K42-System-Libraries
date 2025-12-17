@@ -1,6 +1,13 @@
 #ifdef USB_ENABLED
 
+#define JSMN_STATIC
+#define JSMN_PARENT_LINKS
+#include "os/json/jsmn.h"
+
+#define SKIP_JUDI_ENUMS
 #include "judi.h"
+#undef SKIP_JUDI_ENUMS
+
 #include "os/json/json_print.h"
 #include "os/judi/hash.h"
 #include "os/judi/judi_messages.h"
@@ -17,10 +24,6 @@
 #include <stdlib.h>
 #include <string.h>
 static uint8_t LOG_LEVEL = L_SILENT;
-
-#define JSMN_STATIC
-#define JSMN_PARENT_LINKS
-#include "os/json/jsmn.h"
 
 /* ************************************************************************** */
 
@@ -145,8 +148,7 @@ void preprocess(json_buffer_t *buf) {
     jsmn_init(&parser);
 
     // tokenize the buffer
-    buf->tokensParsed = jsmn_parse(&parser, buf->data, str_len(buf->data),
-                                   buf->tokens, MAX_TOKENS);
+    buf->tokensParsed = jsmn_parse(&parser, buf->data, str_len(buf->data), buf->tokens, MAX_TOKENS);
 
     // terminate each token in the original string
     for (uint8_t i = 0; i < buf->tokensParsed; i++) {
@@ -179,7 +181,7 @@ bool judi_update(char currentChar) {
 
     insert_character(&buffer[active], currentChar);
 
-    // 
+    //
     if (buffer[active].length == 0) {
         return false;
     }
@@ -220,7 +222,7 @@ bool judi_update(char currentChar) {
 
         swap_active_buffer();
     }
-    
+
     return true;
 }
 
