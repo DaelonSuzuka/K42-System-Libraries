@@ -7,6 +7,13 @@ Index of documentation for the OS module.
 - [summary.md](summary.md) - Module overview and cooperative superloop pattern
 - [terminology.md](terminology.md) - Domain language definitions
 
+## Architecture Patterns
+
+- [superloop.md](superloop.md) - The `attempt_*()` pattern for non-blocking tasks
+- [startup.md](startup.md) - Layered initialization sequence
+- [layers.md](layers.md) - Three-layer architecture (peripherals/OS/application)
+- [practices.md](practices.md) - Coding conventions and patterns
+
 ## Subsystems
 
 - [shell.md](shell.md) - Interactive command shell (development builds)
