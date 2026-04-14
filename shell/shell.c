@@ -169,13 +169,8 @@ void process_escape_sequence(key_t key) {
 void shell_update(char currentChar) {
     // execute shell callback, if one is registered
     if (shellCallback) {
-        // ctrl+c forces the program to terminate
-        if (currentChar == 3) {
-            terminate_current_program();
-            return;
-        }
-        // execute callback
-        if (shellCallback(currentChar) == -1) {
+        int8_t result = shellCallback(currentChar);
+        if (currentChar == 3 || result == -1) {
             terminate_current_program();
         }
         return;
