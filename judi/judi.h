@@ -8,27 +8,8 @@
 
 /* ************************************************************************** */
 
-#ifndef SKIP_JUDI_ENUMS
-typedef enum {
-    JSMN_UNDEFINED = 0, //
-    JSMN_OBJECT = 1,
-    JSMN_ARRAY = 2,
-    JSMN_STRING = 3,
-    JSMN_PRIMITIVE = 4
-} jsmntype_t;
-
 #define JSMN_PARENT_LINKS
-typedef struct {
-    jsmntype_t type;
-    int start;
-    int end;
-    int size;
-    int hash;
-#ifdef JSMN_PARENT_LINKS
-    int parent;
-#endif
-} jsmntok_t;
-#endif
+#include "os/json/jsmn_types.h"
 
 // Incoming JSON objects MUST BE shorter than this length
 #define JSON_BUFFER_SIZE 256

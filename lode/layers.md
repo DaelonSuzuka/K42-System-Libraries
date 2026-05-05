@@ -59,9 +59,11 @@ Portable bare-metal abstractions that work across PIC18 devices.
 - `buttons.c` - Debounced button input
 - `system_time.c` - Millisecond counter
 
-**Allowed to depend on:** Peripheral layer (via interfaces)
+**Allowed to depend on:** Peripheral layer (via their APIs)
 
 **Never depends on:** Application layer
+
+**Pragmatic boundary:** The OS layer directly calls peripheral library functions (NCO, SMT, UART init). It knows *which* peripherals it needs, not just *that it needs some timer*. Further decoupling (e.g., injecting timer interfaces through function pointers) would add RAM/call overhead on an 8-bit MCU for no practical benefit. The real decoupling is the submodule boundary: the OS layer can be dropped into any project with compatible peripheral drivers, and the project wires them together in `system.c`.
 
 ### Peripheral Layer
 

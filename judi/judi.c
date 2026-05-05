@@ -4,9 +4,7 @@
 #define JSMN_PARENT_LINKS
 #include "os/json/jsmn.h"
 
-#define SKIP_JUDI_ENUMS
 #include "judi.h"
-#undef SKIP_JUDI_ENUMS
 
 #include "os/json/json_print.h"
 #include "os/judi/hash.h"

@@ -1,6 +1,7 @@
-# Shell Subsystem
+# Shell Subsystem — Chitin v0.6.0
 
 Interactive command shell for development builds. Disabled in release builds via preprocessor.
+Fully non-blocking except for one 5ms busy-wait in escape sequence interception.
 
 ## Architecture
 
@@ -14,6 +15,36 @@ flowchart LR
     Processor --> Builtins[shell_builtins.c]
     Processor --> Commands[Registered Commands]
 ```
+
+## Three Operating Modes
+
+1. **Line mode** (default) — characters accumulate in `shell_line_t`, cursor moves, backspace deletes, history navigates. Standard readline-like behavior. Every operation is O(1) per character.
+
+2. **Callback mode** — `shell_register_callback(fn)` redirects all input to a custom function. Callback returns 0 to continue, -1 to exit. Ctrl-C (char 3) always terminates. Used for interactive programs like `reboot` confirmation.
+
+3. **TUI callback mode** — same mechanism with `shellCallbackSettings.fullscreen = 1`. On exit, `terminate_current_program()` resets terminal state (colors, screen, cursor) because "there's no way to know what state a program was in when we kill it." Programs don't have to clean up after themselves.
+
+The callback system inverts the flow — instead of the shell calling your program, your program takes over the input stream. Same pattern as `ui_idle_block()` in the superloop.
+
+## Escape Sequence Decoder
+
+`shell_keys.c` decodes VT102/xterm escape sequences using sequence length + character positions. `intercept_escape_sequence()` busy-waits up to 5ms after ESC, collecting characters via `getch()` and trying `decode_escape_sequence()` after each one. Handles variant encodings (HOME has two sequences, F5 has two, etc.). Modifier keys (shift/alt/ctrl) extracted from positions 3-4 in longer sequences.
+
+**Diagnostics mode** (F6 toggle) prints every decoded sequence — essential for terminal compatibility debugging.
+**History inspection** (F7 toggle) dumps the ring buffer state, pointer position, and temp line — watch the history ring operate in real time.
+
+## Key Design Decisions
+
+- **X-macro code generation** — `KEY_NAME_LIST` and `KEY_MODIFIER_LIST` produce both the enum and the diagnostic string tables. No synchronization risk.
+- **PIC18 paged memory workaround** — history lines are separate globals (`history_0`, `history_1`, ...) tied together by a pointer array. Can't have a struct array spanning memory pages. The "this is disgusting" comment in `shell_history.c` is honest.
+- **`version -j`** — `sh_version` with `-j` prints device info as JSON via the node builder. Shell and JUDI share the same outbound serializer.
+- **`shell_command_processor.h` guard** — uses `#ifdef LOGGING_ENABLED` but should be `#ifdef SHELL_ENABLED`. Commands can't register when shell is disabled, but the guard checks the wrong flag.
+
+## Known Issues
+
+See `bug-register.md` for: `insert_char_at_cursor` uint8_t wrap (critical), history modulo (medium), `isprint`/`iscntrl` signed char UB (medium), `shell_utils.h` printf vs sh_print (low), command registration no bounds check (high).
+
+**5ms blocking loop** in `intercept_escape_sequence()` — the only place the shell blocks. Can cause missed deadlines (button debounce, display, RF). Fix requires a persistent state machine across `shell_update()` calls. The blocking also prevents host-machine compilation/testing — `getch()` is platform-specific. A stateful fix would naturally enable host testing. See `lode/roadmap.md`.
 
 ## Enabling the Shell
 

@@ -2,6 +2,14 @@
 
 Precise millisecond timing using NCO (Numerically Controlled Oscillator) and SMT (Signal Measurement Timer).
 
+## Origin
+
+This module was spite-driven development. "There's no way I'm servicing a fucking
+interrupt 1k times per second" → read the PIC datasheet → discovered NCO can generate
+a pulse train that the SMT counts autonomously. Result: the only ISR fires every ~16.7
+seconds (SMT overflow), and time still counts during critical sections where interrupts
+are disabled. The hardware does the work; the CPU doesn't.
+
 ## Hardware Configuration
 
 PIC18 Q41 devices have NCO and SMT peripherals that combine to create a 32-bit millisecond counter:
@@ -98,9 +106,35 @@ void __interrupt(irq(SMT1), high_priority) SMT_overflow_ISR() {
 - `clockmon` - Monitor the clock counter
 - `uptime` - Show uptime in D:H:M:S format
 
-## Key Files
+## Known Issues
 
-| File | Purpose |
-|------|---------|
-| `system_time.c` | Implementation |
-| `system_time.h` | Public interface |
+- **Header comments are stale** — `system_time.h` describes 24-bit-only (4.6 hour overflow)
+  from before `smtOverflowCount` was added. The actual range is 49.7 days (32-bit).
+  Comments need updating to reflect the 32-bit composition.
+- **NCO incrementor is hardcoded** (`0x000831`) — TODO in source says it should be
+  parameterized by the project. Currently requires hand-tuning if clock source changes.
+- **`delay_us()` is a NOP loop** — 10 NOPs per iteration, calibrated for 1µs at current
+  clock speed. Loop overhead (while decrement + compare + jump) not accounted for.
+  The ±2% accuracy claim may not hold. Fragile if compiler optimization or clock changes,
+  but only used in init code.
+- **`delay_ms()` blocks the superloop** — appropriate for init only, not main loop.
+- **`extern` forward declarations** — `sh_clockmon` and `sh_uptime` declared with
+  `extern` in system_time.c instead of including their header. Bypasses type checking;
+  will silently break if signatures change. (C standard portability is not a design goal,
+  but this is a real type-safety concern within the project itself.)
+
+## Timing Chain of Trust
+
+Task execution time annotations (e.g., `poll_RF() // takes 203 uS`) come from the
+µs stopwatch, which is validated against system_time, which is validated against a
+pin-toggle measured on an oscilloscope:
+
+```
+Oscilloscope (physical reality)
+  → validates system_time (pin toggle with delay_ms)
+    → validates µs stopwatch (self-test)
+      → provides task timing numbers
+```
+
+Without this chain, timing numbers are guesses. With it, scheduling decisions are
+grounded in real hardware measurement.

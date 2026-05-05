@@ -2,6 +2,21 @@
 
 Debounced button input using the "Ultimate Debouncer" pattern. Publisher/subscriber model separates polling from state queries.
 
+## The Pattern
+
+Each button gets an 8-bit shift register. Every 5ms (typically from a timer ISR), the
+register shifts left and ORs in the current pin state. After 8 samples, the history
+contains the recent past:
+
+```
+bit7 bit6 bit5 bit4 bit3 bit2 bit1 bit0
+ old  old  mid  mid  mid  new  new  new
+```
+
+The middle 3 bits are "bouncy" — masked out. The old and new ends are stable.
+Comparing masked patterns against known values gives debounced edge detection
+in a single operation, with hysteresis built in.
+
 ## Architecture
 
 ```mermaid
@@ -99,9 +114,19 @@ void attempt_button_handling(void) {
 }
 ```
 
-## Key Files
+## Edge Detection is Stateful
 
-| File | Purpose |
-|------|---------|
-| `buttons.c` | Implementation |
-| `buttons.h` | Public interface |
+`btn_is_pressed()` and `btn_is_released()` write to the history when they detect
+an edge, setting it to the steady state. This prevents double-firing on the next
+call. Side effect: calling `btn_is_pressed()` twice in the same iteration means
+only the first call sees the edge. This is correct — a button press fires once.
+
+## Composes with Pin Codegen
+
+`pinmap.py` generates `read_<PIN_NAME>()` functions that match the `button_check_t`
+signature. The project passes the generated array to `buttons_init()`. No manual
+wiring needed — codegen and debouncer decouple naturally via the function-pointer seam.
+
+## Status
+
+Stable. Untouched for years. "Just works."

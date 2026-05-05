@@ -1,12 +1,22 @@
 # Terminology
 
-Domain-specific terms used in the OS module.
+Domain-specific terms used in the OS module. Terms marked with → are defined in detail in [practices.md](practices.md).
 
 ## Architecture Terms
 
 - **Superloop** - Bare-metal main loop with cooperative multitasking; no RTOS
 - **attempt_* pattern** - Non-blocking task functions that check timing and return immediately
 - **time_since()** - Pattern for non-blocking delays using millisecond counter
+- **Billboard** → - A global that's okay: one instance, one writer, many readers, always current (e.g. currentRF, systemFlags)
+- **Semantic Compression** → - Write inline, compress on second instance, never preemptively abstract
+- **Events Layer** → - Shared processing between UI stimuli (buttons, shell, JUDI) and business logic
+
+## Correctness Terms
+
+- **Correctness by Boundaries** → - stimulus→processing→response keeps state contained
+- **Correctness by Construction** → - the structure makes wrong states impossible
+- **Don't fuck with it** → - working code isn't refactored for aesthetics; stability is a feature
+- **Fail loudly** → - if something's wrong, it should obviously break, not be subtly wrong
 
 ## Shell Terms
 
