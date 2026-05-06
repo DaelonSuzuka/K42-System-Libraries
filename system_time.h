@@ -11,10 +11,6 @@
 
     There are several differences between millis() and get_current_time():
 
-    millis() stores its count in a uint32_t, meaning it takes roughly 49 days
-    for millis() to overflow. get_current_time() stores its count in a uint24_t,
-    meaning it takes roughly 4.6 hours to overflow.
-
     millis() requires an interrupt to fire every millisecond, and an ISR that
     increments a 4-byte-long uint32_t. This is a very quick ISR, but it's less
     than ideal that this ISR will need to be running all the time, behind any
@@ -22,13 +18,16 @@
     interrupt, so it still counts time during critical sections of code and will
     never contribute to interrupt-based timer bugs.
 
-    This module uses several hardware features of the K42. One hardware timer of
-    any variety needs to be configured to overflow every millisecond.
+    This module uses several hardware features of the PIC18 Q41 family. One
+    hardware timer (the NCO) is configured to generate a ~1kHz pulse train,
+    which the Signal Measurement Timer (SMT) counts. The SMT is a 24-bit counter
+    that increments once per millisecond, completely in the background. No
+    interrupts are necessary to count time.
 
-    This timer is then configured as the clock source of the Signal Measurement
-    Timer, a special 24-bit counter. This causes the SMT to increment once every
-    millisecond, completely in the background. No interrupts are necessary to
-    count time.
+    An 8-bit overflow counter extends the 24-bit SMT to a 32-bit millisecond
+    counter, giving a range of ~49.7 days before overflow. The ISR that
+    increments this counter fires only every ~4.66 hours (when the SMT
+    overflows).
 
     The SMT has another special feature that assists with read operations.
     Manipulating a 24-bit value on an 8-bit system takes several operations,
@@ -38,12 +37,13 @@
     worrying about atomic access.
 
     Maximum countable time:
-    UINT24_MAX = 16,777,216 ticks until overflow
+    UINT32_MAX = 4,294,967,296 ticks until overflow
 
     Each tick = 1 millisecond:
-    16,777,216 / 1000 = 16,777.216 seconds
-    16,777 / 60 = 279.6 minutes
-    279 minutes / 60 = 4.6 hours until overflow
+    4,294,967,296 / 1000 = 4,294,967.296 seconds
+    4,294,967 / 60 = 71,582.7 minutes
+    71,582 / 60 = 1,193.0 hours
+    1,193 / 24 = ~49.7 days until overflow
 
 */
 /* ************************************************************************** */

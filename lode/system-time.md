@@ -6,8 +6,8 @@ Precise millisecond timing using NCO (Numerically Controlled Oscillator) and SMT
 
 This module was spite-driven development. "There's no way I'm servicing a fucking
 interrupt 1k times per second" → read the PIC datasheet → discovered NCO can generate
-a pulse train that the SMT counts autonomously. Result: the only ISR fires every ~16.7
-seconds (SMT overflow), and time still counts during critical sections where interrupts
+a pulse train that the SMT counts autonomously. Result: the only ISR fires every ~4.66
+hours (SMT overflow), and time still counts during critical sections where interrupts
 are disabled. The hardware does the work; the CPU doesn't.
 
 ## Hardware Configuration
@@ -97,7 +97,7 @@ volatile uint8_t smtOverflowCount;
 
 void __interrupt(irq(SMT1), high_priority) SMT_overflow_ISR() {
     smt_clear_interrupt_flag();
-    smtOverflowCount++;  // Increments every ~16.7 seconds
+    smtOverflowCount++;  // Increments every ~4.66 hours
 }
 ```
 
@@ -108,9 +108,6 @@ void __interrupt(irq(SMT1), high_priority) SMT_overflow_ISR() {
 
 ## Known Issues
 
-- **Header comments are stale** — `system_time.h` describes 24-bit-only (4.6 hour overflow)
-  from before `smtOverflowCount` was added. The actual range is 49.7 days (32-bit).
-  Comments need updating to reflect the 32-bit composition.
 - **NCO incrementor is hardcoded** (`0x000831`) — TODO in source says it should be
   parameterized by the project. Currently requires hand-tuning if clock source changes.
 - **`delay_us()` is a NOP loop** — 10 NOPs per iteration, calibrated for 1µs at current
