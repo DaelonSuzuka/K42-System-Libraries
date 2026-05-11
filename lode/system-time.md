@@ -15,13 +15,58 @@ are disabled. The hardware does the work; the CPU doesn't.
 PIC18 Q41 devices have NCO and SMT peripherals that combine to create a 32-bit millisecond counter:
 
 ```mermaid
-flowchart LR
-    A[MFINTOSC 500kHz] --> B[NCO1]
-    B --> C[~1kHz pulses]
-    C --> D[SMT Counter]
-    D --> E[24-bit Timer]
-    E --> F[+ 8-bit Overflow]
-    F --> G[32-bit ms counter]
+flowchart TD
+    subgraph Clock Source
+        MFINTOSC["MFINTOSC<br/>500 kHz internal oscillator"]
+    end
+
+    subgraph NCO1 - Pulse Frequency Mode
+        NCO["NCO1<br/>Incrementor: 0x000831<br/>Output: ~1 pulse per ms"]
+    end
+
+    subgraph SMT1 - 24-bit Hardware Counter
+        SMT_COUNTER["SMT1TMR<br/>24-bit counter<br/>Counts NCO pulses"]
+        SMT_LATCH["SMT1CPR<br/>Captured Period Register<br/>Atomic 24-bit snapshot"]
+        SMT_OVERFLOW["SMT Overflow ISR<br/>Fires every ~16.7s<br/>Increments smtOverflowCount"]
+    end
+
+    subgraph 32-bit Composition
+        UPPER["smtOverflowCount<br/>8-bit ISR counter<br/>Upper 8 bits"]
+        LOWER["smt_read()<br/>24-bit SMT latch<br/>Lower 24 bits"]
+        RESULT["system_time_t (uint32_t)<br/>49.7 day range<br/>(overflowCount shift-left-24) + smt_read"]
+    end
+
+    MFINTOSC -->|"500 kHz clock"| NCO
+    NCO -->|"~1 kHz pulse train"| SMT_COUNTER
+    SMT_COUNTER -->|"CPRUP bit snapshots counter"| SMT_LATCH
+    SMT_COUNTER -->|"overflow at 2^24"| SMT_OVERFLOW
+    SMT_OVERFLOW --> UPPER
+    SMT_LATCH --> LOWER
+    UPPER --> RESULT
+    LOWER --> RESULT
+```
+
+## Reading and Consuming Time
+
+```mermaid
+flowchart TD
+    subgraph get_current_time - Atomic 32-bit read
+        STEP1["1. Disable SMT interrupt"]
+        STEP2["2. smt_latch_now() - snapshot 24-bit counter"]
+        STEP3["3. Compose: (overflowCount shift-left-24) + smt_read()"]
+        STEP4["4. Re-enable SMT interrupt"]
+        STEP1 --> STEP2 --> STEP3 --> STEP4
+    end
+
+    subgraph Consumers
+        TIME_SINCE["time_since(startTime)<br/>get_current_time() - startTime<br/>32-bit wraparound handled naturally"]
+        DELAY_MS["delay_ms(n)<br/>Blocks until time_since(start) >= n<br/>Init only - never in main loop!"]
+        DELAY_US["delay_us(n)<br/>10 NOPs per us iteration<br/>Approximate, clock-speed dependent"]
+    end
+
+    STEP4 --> TIME_SINCE
+    STEP4 --> DELAY_MS
+    DELAY_US -.->|"separate NOP loop,<br/>no dependency on system_time"| TIME_SINCE
 ```
 
 ## Configuration
