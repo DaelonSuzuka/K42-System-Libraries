@@ -1,5 +1,3 @@
-#include "os/json/json_print.h"
-#include "os/judi/judi_messages.h"
 #include "os/libs/str_len.h"
 #include "os/serial_port.h"
 #include "os/system_information.h"
@@ -8,6 +6,10 @@
 #include "shell_config.h"
 #include "shell_cursor.h"
 #include "system.h"
+#ifdef USB_ENABLED
+#include "os/json/json_print.h"
+#include "os/judi/judi_messages.h"
+#endif
 
 /* ************************************************************************** */
 
@@ -110,11 +112,13 @@ void sh_test(int argc, char **argv) {
 /* -------------------------------------------------------------------------- */
 
 void sh_version(int argc, char **argv) {
+#ifdef USB_ENABLED
     if ((argc == 2) && (!strcmp(argv[1], "-j"))) {
         json_print(print, deviceInfo);
         println("");
         return;
     }
+#endif
 
     printf("%s %s", &productName, &productVersion);
     println("");
