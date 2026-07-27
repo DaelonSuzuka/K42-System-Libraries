@@ -91,9 +91,31 @@ but technically undefined behavior. Remove the & operator.
 - shell_keys.c: busy-wait in intercept_escape_sequence blocks system
 - serial_port.c: `wtf` 2-byte buffer workaround for broken `uart.tx_char()` — every
   printf character becomes a null-terminated string print instead of a single byte
-  write. Kills printf performance. `usb_port.c` uses `tx_char()` directly without
-  the workaround. Only affects dev builds (shell uses printf, release doesn't).
-  Cannot fix without hardware to verify.
+  write. Kills printf performance. Only affects dev builds (shell uses printf,
+  release doesn't).
+
+  **Root cause analysis (2026-07-27, XC8 v2.45):** the workaround dates to
+  2021-07-11 (`f1b6061`); the UART driver's tx path is unchanged since 2021-03.
+  The breakage shape: printf's `_doprnt` calls `putch` through a function
+  pointer, and `putch` then calls `uart.tx_char` through another function
+  pointer — nested indirect calls. `tx_char` is the only interface function
+  whose parameter travels in **WREG**; the string functions pass parameters in
+  memory. XC8's indirect-call trampoline uses WREG to assemble the target
+  address in TOSL/TOSH — v2.45 provably reloads the char param into WREG as the
+  last instruction before the jump (verified in disassembly), but if the
+  2021-era compiler's trampoline did not, the target received an address byte
+  instead of the character: shell prints garbage, every string API works, and
+  nothing in the C source is wrong. "Magically broken" is what a codegen bug
+  looks like from source level.
+
+  Evidence the fix is now safe: rebuilt with the direct call under v2.45 — the
+  generated trampoline is correct by inspection, call graph includes all four
+  class members, no reentrancy warnings, one less hardware stack level. Also,
+  `tx_char` is exercised through the identical indirect path by MC-7300's CI-V
+  radio TX and the PI554 backlight (120 bytes/frame at 8 Mbaud) and works on
+  hardware. Remaining gate: one bench test — flash a dev build with
+  `putch(data) { uart.tx_char(data); }`, open the shell; failure mode is
+  instantly-visible garbage. If readable, delete `wtf` and the workaround.
 - shell_utils.h: some macros use printf (stdout) instead of sh_print (serial port)
 
 ## Resolved
