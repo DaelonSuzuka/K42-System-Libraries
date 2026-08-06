@@ -32,7 +32,20 @@ A **billboard** is a global variable that's okay. Criteria: exactly one instance
 
 ### Testing Philosophy
 
-Code is written to be testable (functional, clear boundaries) but not tested automatically (no test framework, no host compilation path). The shell is the test infrastructure — `rfmon` tests the RF sensor, `logedit` tests logging, `backlightmon` tests the backlight. Every interactive command exists partly to exercise its module. At this codebase scale, with one author who knows every call site, that's a pragmatic balance.
+**On-device (primary for impure code):** the shell is the test infrastructure —
+`rfmon`, `logedit`, `backlightmon`, inject/log commands. Interactive commands
+exist partly to exercise modules. No mock UART/SFR harness.
+
+**Host (pure islands only):** decision tables and decode/map with no hardware
+deps can ship as co-located `foo_test.c` and run via the toolchain:
+
+```bash
+make test    # zig cc from venv; see toolchain/lode/host-tests.md
+```
+
+Firmware builds skip `*_test.c` automatically. Do not bend drivers into host
+tests. Canonical how-to lives in the **toolchain** submodule so it propagates
+with `make test` to every project — link there, do not fork a second convention.
 
 ### Read the Fucking Datasheet
 
