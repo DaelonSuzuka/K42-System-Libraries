@@ -37,6 +37,7 @@ log_features_t logFeatures = {true, true, true, true, true};
 /* -------------------------------------------------------------------------- */
 
 void logedit(int argc, char **argv);
+void sh_log(int argc, char **argv);
 
 void logging_init(void) {
     for (uint8_t i = 0; i < MAX_NUMBER_OF_FILES; i++) {
@@ -46,6 +47,7 @@ void logging_init(void) {
     logDatabase.numberOfFiles = 0;
 
     shell_register_command(logedit, "logedit");
+    shell_register_command(sh_log, "log");
 }
 
 void log_register__(const char *name, uint8_t *levelPtr) {
@@ -351,6 +353,106 @@ int8_t logedit_callback(char currentChar) {
     return 0;
 }
 
+/* ************************************************************************** */
+// log — line-based log level control (companion to the logedit TUI)
+//
+//   log                    list all sources and current levels
+//   log <src> <level>     set level for source (e.g. "log meter.c silent")
+//   log push <src> <lvl>  save current level, set new
+//   log pop <src>          restore saved level
+//
+// Level names are case-insensitive: silent fatal error warn info debug trace
+// Source is the short file name (e.g. "meter.c", "radio.c").
+
+static uint8_t parse_level(const char *s) {
+    for (uint8_t i = 0; i < NUMBER_OF_LOG_LEVELS; i++) {
+        // case-insensitive compare against level_names[i]
+        const char *ref = level_names[i];
+        uint8_t j = 0;
+        while (s[j] && ref[j]) {
+            if (tolower(s[j]) != tolower(ref[j])) {
+                break;
+            }
+            j++;
+        }
+        if (s[j] == '\0' && ref[j] == '\0') {
+            return i;
+        }
+    }
+    return 0xFF; // not found
+}
+
+static int8_t find_source(const char *name) {
+    for (uint8_t i = 0; i < logDatabase.numberOfFiles; i++) {
+        if (!strcmp(name, logDatabase.file[i].shortName)) {
+            return (int8_t)i;
+        }
+    }
+    return -1;
+}
+
+void sh_log(int argc, char **argv) {
+    // log  →  list all
+    if (argc == 1) {
+        for (uint8_t i = 0; i < logDatabase.numberOfFiles; i++) {
+            print_log_level(*logDatabase.file[i].levelPtr);
+            printf("  %s\r\n", logDatabase.file[i].shortName);
+        }
+        return;
+    }
+
+    // log push <src> <level>
+    if (argc == 4 && !strcmp(argv[1], "push")) {
+        int8_t id = find_source(argv[2]);
+        if (id < 0) {
+            printf("unknown source: %s\r\n", argv[2]);
+            return;
+        }
+        uint8_t lvl = parse_level(argv[3]);
+        if (lvl == 0xFF) {
+            printf("unknown level: %s\r\n", argv[3]);
+            return;
+        }
+        savedLevel = *logDatabase.file[id].levelPtr;
+        log_level_edit(id, lvl);
+        print_log_level(lvl);
+        printf("  %s (pushed)\r\n", logDatabase.file[id].shortName);
+        return;
+    }
+
+    // log pop <src>
+    if (argc == 3 && !strcmp(argv[1], "pop")) {
+        int8_t id = find_source(argv[2]);
+        if (id < 0) {
+            printf("unknown source: %s\r\n", argv[2]);
+            return;
+        }
+        log_level_edit(id, savedLevel);
+        print_log_level(savedLevel);
+        printf("  %s (popped)\r\n", logDatabase.file[id].shortName);
+        return;
+    }
+
+    // log <src> <level>
+    if (argc == 3) {
+        int8_t id = find_source(argv[1]);
+        if (id < 0) {
+            printf("unknown source: %s\r\n", argv[1]);
+            return;
+        }
+        uint8_t lvl = parse_level(argv[2]);
+        if (lvl == 0xFF) {
+            printf("unknown level: %s\r\n", argv[2]);
+            return;
+        }
+        log_level_edit(id, lvl);
+        print_log_level(lvl);
+        printf("  %s\r\n", logDatabase.file[id].shortName);
+        return;
+    }
+
+    sh_println("usage: log [push] <source> <level>  |  log pop <source>  |  log");
+}
 // setup
 void logedit(int argc, char **argv) {
     // make a backup of the existing log database
